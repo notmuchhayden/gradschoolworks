@@ -27,18 +27,20 @@ X_new = [x1, x2]
 
 # 판별 함수 정의
 def classify_common_cov(x, M, smean):
+    # 클래스 공통 공분산 행렬 : (x - m)^T * sigma^-1 * (x - m)
     d = [ (x - m).T @ np.linalg.inv(smean) @ (x - m) for m in M ]
     return np.argmin(d)
 
-def classify_individual_cov(x, M, S):
+def classify_general_cov(x, M, S):
+    # 일반적인 공분산 행렬 : (x - m)^T * sigma^-1 * (x - m) + ln|sigma|
     d = [ (x - m).T @ np.linalg.inv(s) @ (x - m) for m, s in zip(M, S) ]
     return np.argmin(d)
 
 # 결과 출력
 for i, x in enumerate(X_new):
     c_common = classify_common_cov(x, M, smean)
-    c_indiv = classify_individual_cov(x, M, S)
-    print(f"x{i+1} = {x} => 공통공분산: 클래스 {c_common+1}, 개별공분산: 클래스 {c_indiv+1}")
+    c_indiv = classify_general_cov(x, M, S)
+    print(f"x{i+1} = {x} => 공통공분산: 클래스 {c_common+1}, 일반공분산: 클래스 {c_indiv+1}")
 
 # 산점도 그리기
 plt.figure(figsize=(8, 6))
