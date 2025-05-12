@@ -109,9 +109,9 @@ for iteration in range(10):
 
     # 반복 완료 조건 검사(수렴 조건 검사)
     if np.sum(np.sqrt(np.sum((oldm - m) ** 2, axis=1))) < 1e-3:
-        plt.scatter(calculated_mu1[0], calculated_mu1[1], c='r', marker='x', s=150, linewidths=3, label='Calculated Mean 1')
-        plt.scatter(calculated_mu2[0], calculated_mu2[1], c='g', marker='x', s=150, linewidths=3, label='Calculated Mean 2')
-        plt.scatter(calculated_mu3[0], calculated_mu3[1], c='b', marker='x', s=150, linewidths=3, label='Calculated Mean 3')
+        plt.scatter(calculated_mu1[0], calculated_mu1[1], c='k', marker='x', s=150, linewidths=1, label='Calculated Mean 1')
+        plt.scatter(calculated_mu2[0], calculated_mu2[1], c='k', marker='x', s=150, linewidths=1, label='Calculated Mean 2')
+        plt.scatter(calculated_mu3[0], calculated_mu3[1], c='k', marker='x', s=150, linewidths=1, label='Calculated Mean 3')
         plt.show()
         break
 
