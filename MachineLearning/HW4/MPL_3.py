@@ -3,9 +3,9 @@
 # 개 데이터에 대한 클래스 레이블로 1과 –1로 구분되어 있음.
 # (단, 종료조건으로 최대 반복횟수는 1,000회 그리고 학습오차 0.05 미만으로 설정하시오)
 
-# (2) (10점) 입력 뉴런 2개 - 은닉 뉴런 5개 - 출력 뉴런 1개의 다층 퍼셉트론을 구성하고 학
-# 습을 수행하시오. 이때 학습이 종료된 후 신경망의 출력오차를 계산하여 학습 횟수에 따른
-# 오차의 변화과정을 그래프로 출력하시오.
+# (3) (20점) 1.(2)에서 학습된 신경망의 결정경계를 학습 데이터와 함께 그래프로 표시하시오.
+# (※ 결정경계 계산 시 meshgrid 범위:
+# [x, y] = meshgrid([-4:0.1:10], [-4:0.1:10]);)
 
 import os
 import numpy as np
@@ -33,7 +33,7 @@ def MLPtest(Xtst, Ttst, w, w0, v, v0):
             Ytst[i, 0] = 1                  # 최종 인식 결과 판단
         else:
             Ytst[i, 0] = -1
-    SEtst = np.sum(E ** 2) / N              # 평균제곱오차 계산
+    SEtst = np.sum(E) / N                   # 평균제곱오차 계산 (수정: E는 이미 각 샘플의 제곱오차임)
     diffTY = np.sum(np.abs(Ttst - Ytst), axis=1) / 2
     CEtst = np.sum(diffTY) / N              # 분류오차 계산
     return SEtst, CEtst
@@ -63,7 +63,7 @@ Elimit = 0.05
 Serr = []
 Cerr = []
 
-for j in range(2, Mstep + 1):               # 학습 반복 시작
+for j in range(1, Mstep + 1):               # 학습 반복 시작 (수정: 1부터 Mstep회 반복하도록 변경)
     E = np.zeros((N, 1))
     for i in range(N):                      # 각 데이터에 대한 반복 시작
         x, t = X[i, :], T[i, :]             # 입력과 목표 출력 데이터 선택
@@ -96,6 +96,47 @@ plt.xlabel('Iterations (Epochs)')
 plt.ylabel('Error')
 plt.legend()
 plt.grid(True)
+plt.show()
+
+# (3) (20점) 학습된 신경망의 결정경계를 학습 데이터와 함께 그래프로 표시
+# (※ 결정경계 계산 시 meshgrid 범위: [x, y] = meshgrid([-4:0.1:10], [-4:0.1:10]);)
+print("\n문제 (3): 결정경계 및 학습 데이터 시각화 중...")
+
+# Meshgrid 생성
+h_mesh = 0.1  # meshgrid 간격
+x_mesh_min, x_mesh_max = -4, 10
+y_mesh_min, y_mesh_max = -4, 10
+# np.arange는 마지막 값을 포함하지 않으므로, x_mesh_max + h_mesh 와 같이 설정
+xx, yy = np.meshgrid(np.arange(x_mesh_min, x_mesh_max + h_mesh, h_mesh),
+                     np.arange(y_mesh_min, y_mesh_max + h_mesh, h_mesh))
+
+# Meshgrid 위의 각 점에 대한 예측 수행 (학습된 가중치 w, w0, v, v0 사용)
+grid_points = np.c_[xx.ravel(), yy.ravel()] # 모든 grid 점들을 1차원으로 펼쳐서 (N_points, 2) 형태로 만듦
+uh_grid = np.dot(grid_points, w) + w0       # 은닉층 가중합
+z_grid = np.tanh(uh_grid)                   # 은닉층 출력
+uo_grid = np.dot(z_grid, v) + v0            # 출력층 가중합
+y_grid_pred = np.tanh(uo_grid)              # 출력층 출력 (예측값)
+
+# 예측값을 클래스 레이블로 변환 (y > 0 이면 1, 아니면 -1)
+Z_boundary = np.where(y_grid_pred.reshape(xx.shape) > 0, 1, -1)
+
+# 결정경계 및 학습 데이터 플롯
+plt.figure(figsize=(10, 8))
+plt.contourf(xx, yy, Z_boundary, cmap=plt.cm.RdBu, alpha=0.7) # 결정경계 등고선 플롯
+
+# 학습 데이터 산점도 (기존 산점도 코드와 유사)
+X_class1_plot = X[T[:, 0] == 1]
+X_class_minus1_plot = X[T[:, 0] == -1]
+plt.scatter(X_class1_plot[:, 0], X_class1_plot[:, 1], c='blue', marker='o', edgecolor='k', label='Class 1')
+plt.scatter(X_class_minus1_plot[:, 0], X_class_minus1_plot[:, 1], c='red', marker='x', edgecolor='k', label='Class -1')
+
+plt.title('Decision Boundary with Training Data (Problem 3)')
+plt.xlabel('X1')
+plt.ylabel('X2')
+plt.legend()
+plt.grid(True)
+plt.xlim(xx.min(), xx.max()) # 그래프 범위를 meshgrid에 맞춤
+plt.ylim(yy.min(), yy.max())
 plt.show()
 
 # 데이터 산점도 시각화 (기존 코드 유지)
