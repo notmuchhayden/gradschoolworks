@@ -1,0 +1,108 @@
+# 1. (100점) 참고교재의 프로그램 11-1을 참고하여, 주어진 데이터 HW4data을 이용하여 다층
+# 퍼셉트론을 구현하시오. 데이터의 변수 X는 400개의 2차원 샘플로 구성되었으며, T는 400
+# 개 데이터에 대한 클래스 레이블로 1과 –1로 구분되어 있음.
+# (단, 종료조건으로 최대 반복횟수는 1,000회 그리고 학습오차 0.05 미만으로 설정하시오)
+
+# (2) (10점) 입력 뉴런 2개 - 은닉 뉴런 5개 - 출력 뉴런 1개의 다층 퍼셉트론을 구성하고 학
+# 습을 수행하시오. 이때 학습이 종료된 후 신경망의 출력오차를 계산하여 학습 횟수에 따른
+# 오차의 변화과정을 그래프로 출력하시오.
+
+import os
+import numpy as np
+import scipy.io as sio
+import matplotlib.pyplot as plt
+
+# 입력 벡터를 받아서 하이퍼탄젠트 함수의 1차 도함수의 값을 반환
+def d_tanh(a):
+    return (1 - a) * (1 + a)
+
+# 데이터 집합과 가중치를 받아 평균제곱오차와 분류오차를 계산
+def MLPtest(Xtst, Ttst, w, w0, v, v0):
+    N = Xtst.shape[0]                       # 데이터의 수
+    E = np.zeros((N, 1))
+    Ytst = np.zeros_like(Ttst)              
+    for i in range(N):                      # 각 데이터에 대한 인식 시작
+        x, t = Xtst[i, :], Ttst[i, :]       # 입/출력 데이터 설정        
+        uh = np.dot(x, w) + w0              # 은닉 뉴런의 가중합 계산
+        z = np.tanh(uh)                     # 은닉 뉴런의 출력 계산
+        uo = np.dot(z, v) + v0              # 출력 뉴런의 가중합 계산
+        y = np.tanh(uo)                     # 출력 뉴런의 출력 계산
+        e = y - t                           # 출력 오차 계산
+        E[i] = np.dot(e, e.T)               # 제곱오차 계산        
+        if y[0, 0] > 0:
+            Ytst[i, 0] = 1                  # 최종 인식 결과 판단
+        else:
+            Ytst[i, 0] = -1
+    SEtst = np.sum(E ** 2) / N              # 평균제곱오차 계산
+    diffTY = np.sum(np.abs(Ttst - Ytst), axis=1) / 2
+    CEtst = np.sum(diffTY) / N              # 분류오차 계산
+    return SEtst, CEtst
+
+# 데이터 불러오기
+script_dir = os.path.dirname(os.path.abspath(__file__))
+mat_file_path = os.path.join(script_dir, 'HW4data_Python.mat')
+data = sio.loadmat(mat_file_path)
+
+X = data['X'] # 2차원 샘플 데이터 (400, 2)
+T = data['T'] # 1차원 클래스 레이블 (400, 1)
+
+# 다층 퍼셉트론 구성
+N = X.shape[0]                              # 데이터의 수
+INP, HID, OUT = 2, 5, 1                     # 입력 뉴런 수, 은닉 뉴런 수, 출력 뉴런 수
+
+# 가중치 초기화
+w = np.random.rand(INP, HID) * 0.4 - 0.2    # 입력->은닉 뉴런 가중치 초기화
+w0 = np.random.rand(1, HID) * 0.4 - 0.2     # 바이어스
+v = np.random.rand(HID, OUT) * 0.4 - 0.2    # 은닉->출력 뉴런 가중치 초기화
+v0 = np.random.rand(1, OUT) * 0.4 - 0.2
+
+eta = 0.001                                 # 학습률 설정
+Mstep = 5000                                # 반복횟수 설정
+Elimit = 0.05
+
+Serr = []
+Cerr = []
+
+for j in range(2, Mstep + 1):               # 학습 반복 시작
+    E = np.zeros((N, 1))
+    for i in range(N):                      # 각 데이터에 대한 반복 시작
+        x, t = X[i, :], T[i, :]             # 입력과 목표 출력 데이터 선택
+        uh = np.dot(x, w) + w0              # 은닉 뉴런의 가중합 계산
+        z = np.tanh(uh)                     # 은닉 뉴런의 출력 계산
+        uo = np.dot(z, v) + v0              # 출력 뉴런의 가중합 계산
+        y = np.tanh(uo)                     # 출력 뉴런의 출력 계산
+        e = y - t                           # 출력 오차 계산
+        E[i] = np.dot(e, e.T)               # 제곱오차 계산
+        delta_v = d_tanh(y) * e             # 학습을 위한 델타값 계산 (출력뉴런)
+        delta_w = d_tanh(z) * (delta_v @ v.T) # 학습을 위한 델타값 계산 (은닉뉴런)
+        v -= eta * (z.T @ delta_v)          # 출력 뉴런의 가중치 수정        
+        v0 -= eta * delta_v                 # 출력 뉴런의 바이어스 가중치 수정
+        w -= eta * (x.reshape(-1, 1) @ delta_w) # 은닉 뉴런의 가중치 수정
+        w0 -= eta * delta_w                 # 은닉 뉴런의 바이어스 가중치 수정
+
+    serr, cerr = MLPtest(X, T, w, w0, v, v0) # 학습 오차 계산 함수 호출
+    print(f"{j} {serr:.3f} {cerr:.3f}")     # 오차 변화 출력
+    Serr.append(serr)                       # 오차 변화 저장
+    Cerr.append(cerr)
+    if serr < Elimit:
+        break
+
+# 데이터 시각화
+# 클래스 레이블이 1인 데이터와 -1인 데이터를 분리합니다.
+X_class1 = X[T[:, 0] == 1]
+X_class_minus1 = X[T[:, 0] == -1]
+
+plt.figure(figsize=(8, 6))
+
+# 클래스 1 데이터를 파란색 'o' 마커로 플롯합니다.
+plt.scatter(X_class1[:, 0], X_class1[:, 1], c='blue', marker='o', label='Class 1')
+
+# 클래스 -1 데이터를 빨간색 'x' 마커로 플롯합니다.
+plt.scatter(X_class_minus1[:, 0], X_class_minus1[:, 1], c='red', marker='x', label='Class -1')
+
+plt.title('Scatter Plot of HW4data')
+plt.xlabel('X1')
+plt.ylabel('X2')
+plt.legend()
+plt.grid(True)
+plt.show()
