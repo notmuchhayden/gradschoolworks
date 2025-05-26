@@ -98,15 +98,3 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-# 데이터 산점도 시각화 (기존 코드 유지)
-X_class1 = X[T[:, 0] == 1] # 클래스 레이블이 1인 데이터
-X_class_minus1 = X[T[:, 0] == -1] # 클래스 레이블이 -1인 데이터
-plt.figure(figsize=(8, 6))
-plt.scatter(X_class1[:, 0], X_class1[:, 1], c='blue', marker='o', label='Class 1')
-plt.scatter(X_class_minus1[:, 0], X_class_minus1[:, 1], c='red', marker='x', label='Class -1')
-plt.title('Scatter Plot of HW4data')
-plt.xlabel('X1')
-plt.ylabel('X2')
-plt.legend()
-plt.grid(True)
-plt.show()

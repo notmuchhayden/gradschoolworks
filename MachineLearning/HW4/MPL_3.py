@@ -87,17 +87,6 @@ for j in range(1, Mstep + 1):               # 학습 반복 시작 (수정: 1부
     if serr < Elimit:
         break
 
-# 학습 횟수에 따른 오차 변화 그래프 출력
-plt.figure(figsize=(10, 5))
-plt.plot(Serr, label='Squared Error (Serr)')
-plt.plot(Cerr, label='Classification Error (Cerr)')
-plt.title('Error Change Over Iterations')
-plt.xlabel('Iterations (Epochs)')
-plt.ylabel('Error')
-plt.legend()
-plt.grid(True)
-plt.show()
-
 # (3) (20점) 학습된 신경망의 결정경계를 학습 데이터와 함께 그래프로 표시
 # (※ 결정경계 계산 시 meshgrid 범위: [x, y] = meshgrid([-4:0.1:10], [-4:0.1:10]);)
 print("\n문제 (3): 결정경계 및 학습 데이터 시각화 중...")
@@ -139,15 +128,3 @@ plt.xlim(xx.min(), xx.max()) # 그래프 범위를 meshgrid에 맞춤
 plt.ylim(yy.min(), yy.max())
 plt.show()
 
-# 데이터 산점도 시각화 (기존 코드 유지)
-X_class1 = X[T[:, 0] == 1] # 클래스 레이블이 1인 데이터
-X_class_minus1 = X[T[:, 0] == -1] # 클래스 레이블이 -1인 데이터
-plt.figure(figsize=(8, 6))
-plt.scatter(X_class1[:, 0], X_class1[:, 1], c='blue', marker='o', label='Class 1')
-plt.scatter(X_class_minus1[:, 0], X_class_minus1[:, 1], c='red', marker='x', label='Class -1')
-plt.title('Scatter Plot of HW4data')
-plt.xlabel('X1')
-plt.ylabel('X2')
-plt.legend()
-plt.grid(True)
-plt.show()
