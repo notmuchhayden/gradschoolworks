@@ -27,7 +27,7 @@
     <ClInclude Include="TermProject.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ImageProcessC.h">
+    <ClInclude Include="ImageProcess.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -36,6 +36,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ImageProcessC.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProcessMMX.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

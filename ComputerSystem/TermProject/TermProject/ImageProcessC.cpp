@@ -1,4 +1,4 @@
-#include "ImageProcessC.h"
+#include "ImageProcess.h"
 
 // Convert RGB image to grayscale (black and white)
 void ConvertRGBToBW(unsigned char* bufIn, unsigned char* bufOut, int nWidth, int nHeight)
