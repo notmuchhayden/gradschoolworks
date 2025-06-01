@@ -3,6 +3,10 @@
 
 #include "framework.h"
 #include "TermProject.h"
+#include "ImageProcessC.h" // 상단에 추가
+#include <commdlg.h> // 파일 열기 대화상자 사용
+#include <algorithm>
+#include <chrono> // 상단에 추가
 
 #define MAX_LOADSTRING 100
 
@@ -10,12 +14,85 @@
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
+HBITMAP hBitmap = NULL;                         // 전역 비트맵 핸들
+HBITMAP hBitmapBW = NULL;                       // 흑백 비트맵 핸들 추가
+WCHAR szBmpFile[MAX_PATH] = L"";                // 선택된 파일 경로
+HWND hBtnBW = NULL;                             // 흑백변환 버튼 핸들
+WCHAR g_bwTimeStr[128] = L"";                   // 흑백 변환 시간 문자열
+
+int xScrollPos = 0, yScrollPos = 0;             // 스크롤 위치
+int xMaxScroll = 0, yMaxScroll = 0;             // 스크롤 최대값
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+// 비트맵 해제 함수
+void ReleaseBitmap() {
+    if (hBitmap) {
+        DeleteObject(hBitmap);
+        hBitmap = NULL;
+    }
+    if (hBitmapBW) {
+        DeleteObject(hBitmapBW);
+        hBitmapBW = NULL;
+    }
+}
+
+// 컬러 비트맵을 흑백 비트맵으로 변환하는 함수
+HBITMAP ConvertColorToBW(HBITMAP hSrcBmp) {
+    if (!hSrcBmp) return NULL;
+
+    BITMAP bmp;
+    GetObject(hSrcBmp, sizeof(BITMAP), &bmp);
+
+    int width = bmp.bmWidth;
+    int height = bmp.bmHeight;
+    int bytesPerPixel = 3; // 24비트
+    int stride = ((width * bytesPerPixel + 3) & ~3);
+
+    // 입력 버퍼 준비
+    unsigned char* bufIn = new unsigned char[stride * height];
+    unsigned char* bufOut = new unsigned char[stride * height];
+
+    // 원본 비트맵에서 픽셀 데이터 추출
+    BITMAPINFO bmi = { 0 };
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height; // 상단이 원점
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 24;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    HDC hdc = GetDC(NULL);
+    GetDIBits(hdc, hSrcBmp, 0, height, bufIn, &bmi, DIB_RGB_COLORS);
+    ReleaseDC(NULL, hdc);
+
+    // 시간 측정 및 1000번 반복
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 1000; ++i) {
+        ConvertRGBToBW(bufIn, bufOut, width, height);
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double, std::milli>(end - start).count();
+
+    // 시간 문자열 저장
+    swprintf(g_bwTimeStr, 128, L"흑백 변환 1000회 실행 시간: %.2f ms", elapsed);
+
+    // 결과로 DIBSection 생성
+    void* pBits = nullptr;
+    HBITMAP hDstBmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
+    if (hDstBmp && pBits) {
+        memcpy(pBits, bufOut, stride * height);
+    }
+
+    delete[] bufIn;
+    delete[] bufOut;
+
+    return hDstBmp;
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -123,16 +200,81 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static int imgWidth = 0, imgHeight = 0;
+
     switch (message)
     {
+    case WM_CREATE:
+        hBtnBW = CreateWindowW(L"BUTTON", L"흑백변환",
+            WS_CHILD | WS_VISIBLE,
+            10, 10, 100, 30, hWnd, (HMENU)IDC_BTN_BW, hInst, NULL);
+        ShowWindow(hBtnBW, SW_HIDE);
+        break;
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
-            // 메뉴 선택을 구문 분석합니다:
             switch (wmId)
             {
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+                break;
+            case IDM_OPEN:
+                {
+                    OPENFILENAME ofn = { 0 };
+                    WCHAR szFile[MAX_PATH] = L"";
+                    ofn.lStructSize = sizeof(ofn);
+                    ofn.hwndOwner = hWnd;
+                    ofn.lpstrFilter = L"Bitmap Files (*.bmp)\0*.bmp\0All Files (*.*)\0*.*\0";
+                    ofn.lpstrFile = szFile;
+                    ofn.nMaxFile = MAX_PATH;
+                    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+                    ofn.lpstrTitle = L"비트맵 파일 열기";
+
+                    if (GetOpenFileName(&ofn)) {
+                        ReleaseBitmap();
+                        hBitmap = (HBITMAP)LoadImageW(NULL, szFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+                        if (hBitmap) {
+                            wcscpy_s(szBmpFile, szFile);
+                            hBitmapBW = NULL;
+                            BITMAP bmp;
+                            GetObject(hBitmap, sizeof(BITMAP), &bmp);
+                            imgWidth = bmp.bmWidth;
+                            imgHeight = bmp.bmHeight;
+                            RECT rc;
+                            GetClientRect(hWnd, &rc);
+
+                            // 버튼 위치 계산
+                            int btnX = 10;
+                            int btnY = imgHeight + 10 + imgHeight + 20 - yScrollPos;
+                            SetWindowPos(hBtnBW, NULL, btnX, btnY, 100, 30, SWP_SHOWWINDOW);
+                            ShowWindow(hBtnBW, SW_SHOW);
+
+                            // 스크롤바 설정 (세로: 원본+흑백+버튼)
+                            int totalHeight = imgHeight + 10 + imgHeight + 10 + 30; // 원본 + 간격 + 흑백 + 간격 + 버튼
+                            SCROLLINFO si = { sizeof(SCROLLINFO), SIF_RANGE | SIF_PAGE };
+                            si.nMin = 0;
+                            si.nMax = max(imgWidth, rc.right - rc.left) - 1;
+                            si.nPage = rc.right - rc.left;
+                            SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+                            xMaxScroll = max(0, imgWidth - (rc.right - rc.left));
+                            si.nMax = max(totalHeight, rc.bottom - rc.top) - 1;
+                            si.nPage = rc.bottom - rc.top;
+                            SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+                            yMaxScroll = max(0, totalHeight - (rc.bottom - rc.top));
+                            xScrollPos = yScrollPos = 0;
+                            InvalidateRect(hWnd, NULL, TRUE);
+                        } else {
+                            MessageBox(hWnd, L"비트맵 파일을 불러올 수 없습니다.", L"오류", MB_ICONERROR);
+                        }
+                    }
+                }
+                break;
+            case IDC_BTN_BW:
+                if (hBitmap && !hBitmapBW) {
+                    hBitmapBW = ConvertColorToBW(hBitmap);
+                    InvalidateRect(hWnd, NULL, TRUE);
+                }
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
@@ -142,15 +284,145 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+
+    case WM_SIZE:
+        {
+            RECT rc;
+            GetClientRect(hWnd, &rc);
+            int totalHeight = imgHeight + 10 + (hBitmapBW ? imgHeight + 10 + 30 : 30); // 흑백 있으면 추가
+            SCROLLINFO si = { sizeof(SCROLLINFO), SIF_RANGE | SIF_PAGE };
+            si.nMin = 0;
+            si.nMax = max(imgWidth, rc.right - rc.left) - 1;
+            si.nPage = rc.right - rc.left;
+            SetScrollInfo(hWnd, SB_HORZ, &si, TRUE);
+            xMaxScroll = max(0, imgWidth - (rc.right - rc.left));
+            si.nMax = max(totalHeight, rc.bottom - rc.top) - 1;
+            si.nPage = rc.bottom - rc.top;
+            SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
+            yMaxScroll = max(0, totalHeight - (rc.bottom - rc.top));
+            // 버튼 위치 조정
+            int btnX = 10;
+            int btnY = imgHeight + 10 + (hBitmapBW ? imgHeight + 20 : 20) - yScrollPos;
+            SetWindowPos(hBtnBW, NULL, btnX, btnY, 100, 30, SWP_NOZORDER);
+        }
+        break;
+
+    case WM_HSCROLL:
+        {
+            int nScrollCode = LOWORD(wParam);
+            int nPos = HIWORD(wParam);
+            SCROLLINFO si = { sizeof(SCROLLINFO), SIF_ALL };
+            GetScrollInfo(hWnd, SB_HORZ, &si);
+            int prevPos = xScrollPos;
+            switch (nScrollCode) {
+            case SB_LINELEFT:   xScrollPos = max(xScrollPos - 10, 0); break;
+            case SB_LINERIGHT:  xScrollPos = min(xScrollPos + 10, xMaxScroll); break;
+            case SB_PAGELEFT:   xScrollPos = max(xScrollPos - (int)si.nPage, 0); break;
+            case SB_PAGERIGHT:  xScrollPos = min(xScrollPos + (int)si.nPage, xMaxScroll); break;
+            case SB_THUMBTRACK: xScrollPos = nPos; break;
+            }
+            if (xScrollPos != prevPos) {
+                SetScrollPos(hWnd, SB_HORZ, xScrollPos, TRUE);
+                InvalidateRect(hWnd, NULL, TRUE);
+            }
+        }
+        break;
+
+    case WM_VSCROLL:
+        {
+            int nScrollCode = LOWORD(wParam);
+            int nPos = HIWORD(wParam);
+            SCROLLINFO si = { sizeof(SCROLLINFO), SIF_ALL };
+            GetScrollInfo(hWnd, SB_VERT, &si);
+            int prevPos = yScrollPos;
+            switch (nScrollCode) {
+            case SB_LINEUP:     yScrollPos = max(yScrollPos - 10, 0); break;
+            case SB_LINEDOWN:   yScrollPos = min(yScrollPos + 10, yMaxScroll); break;
+            case SB_PAGEUP:     yScrollPos = max(yScrollPos - (int)si.nPage, 0); break;
+            case SB_PAGEDOWN:   yScrollPos = min(yScrollPos + (int)si.nPage, yMaxScroll); break;
+            case SB_THUMBTRACK: yScrollPos = nPos; break;
+            }
+            if (yScrollPos != prevPos) {
+                SetScrollPos(hWnd, SB_VERT, yScrollPos, TRUE);
+                // 버튼 위치도 갱신
+                int btnX = 10;
+                int btnY = imgHeight + 10 + (hBitmapBW ? imgHeight + 20 : 20) - yScrollPos;
+                SetWindowPos(hBtnBW, NULL, btnX, btnY, 100, 30, SWP_NOZORDER);
+                InvalidateRect(hWnd, NULL, TRUE);
+            }
+        }
+        break;
+
+    case WM_MOUSEWHEEL:
+        {
+            // 휠 한 칸당 120, 기본적으로 3줄씩 스크롤
+            int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+            int lines = 3; // 한 번에 스크롤할 줄 수
+            int scrollAmount = lines * 10; // 기존 한 번에 10픽셀씩 스크롤
+
+            if (zDelta > 0)
+                yScrollPos = max(yScrollPos - scrollAmount, 0);
+            else if (zDelta < 0)
+                yScrollPos = min(yScrollPos + scrollAmount, yMaxScroll);
+
+            SetScrollPos(hWnd, SB_VERT, yScrollPos, TRUE);
+
+            // 버튼 위치도 갱신
+            int btnX = 10;
+            int btnY = imgHeight + 10 + (hBitmapBW ? imgHeight + 20 : 20) - yScrollPos;
+            SetWindowPos(hBtnBW, NULL, btnX, btnY, 100, 30, SWP_NOZORDER);
+
+            InvalidateRect(hWnd, NULL, TRUE);
+        }
+        break;
+
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
+            int yOffset = -yScrollPos;
+            int xOffset = -xScrollPos;
+            if (hBitmap) {
+                HDC hMemDC = CreateCompatibleDC(hdc);
+                HBITMAP hOldBmp = (HBITMAP)SelectObject(hMemDC, hBitmap);
+
+                BITMAP bmp;
+                GetObject(hBitmap, sizeof(BITMAP), &bmp);
+                // 원본 비트맵을 (0,0)에 출력 (스크롤 반영)
+                BitBlt(hdc, xOffset, yOffset, bmp.bmWidth, bmp.bmHeight, hMemDC, 0, 0, SRCCOPY);
+
+                SelectObject(hMemDC, hOldBmp);
+                DeleteDC(hMemDC);
+
+                // 흑백 비트맵 출력
+                if (hBitmapBW) {
+                    HDC hMemDCBW = CreateCompatibleDC(hdc);
+                    HBITMAP hOldBmpBW = (HBITMAP)SelectObject(hMemDCBW, hBitmapBW);
+
+                    BITMAP bmpBW;
+                    GetObject(hBitmapBW, sizeof(BITMAP), &bmpBW);
+                    // 흑백 이미지를 원본 하단에 출력 (스크롤 반영)
+                    int bwY = yOffset + bmp.bmHeight + 10;
+                    BitBlt(hdc, xOffset, bwY, bmpBW.bmWidth, bmpBW.bmHeight, hMemDCBW, 0, 0, SRCCOPY);
+
+                    // 시간 문자열 출력 (흑백 이미지 하단)
+                    if (g_bwTimeStr[0]) {
+                        int textY = bwY + bmpBW.bmHeight + 10;
+                        SetBkMode(hdc, TRANSPARENT);
+                        SetTextColor(hdc, RGB(0,0,0));
+                        TextOutW(hdc, xOffset + 10, textY, g_bwTimeStr, (int)wcslen(g_bwTimeStr));
+                    }
+
+                    SelectObject(hMemDCBW, hOldBmpBW);
+                    DeleteDC(hMemDCBW);
+                }
+            }
             EndPaint(hWnd, &ps);
         }
         break;
+
     case WM_DESTROY:
+        ReleaseBitmap();
         PostQuitMessage(0);
         break;
     default:
