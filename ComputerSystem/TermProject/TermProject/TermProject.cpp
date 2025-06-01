@@ -7,8 +7,11 @@
 #include <commdlg.h> // 파일 열기 대화상자 사용
 #include <algorithm>
 #include <chrono> // 상단에 추가
+#include <fstream> // BMP 파일 직접 읽기
+#include <vector>
 
 #define MAX_LOADSTRING 100
+#define IDC_BTN_BW_MMX 2001 // 버튼 ID 추가
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -18,6 +21,7 @@ HBITMAP hBitmap = NULL;                         // 전역 비트맵 핸들
 HBITMAP hBitmapBW = NULL;                       // 흑백 비트맵 핸들 추가
 WCHAR szBmpFile[MAX_PATH] = L"";                // 선택된 파일 경로
 HWND hBtnBW = NULL;                             // 흑백변환 버튼 핸들
+HWND hBtnBW_MMX = NULL;                         // MMX 흑백변환 버튼 핸들 추가
 WCHAR g_bwTimeStr[128] = L"";                   // 흑백 변환 시간 문자열
 
 int xScrollPos = 0, yScrollPos = 0;             // 스크롤 위치
@@ -39,9 +43,11 @@ void ReleaseBitmap() {
         DeleteObject(hBitmapBW);
         hBitmapBW = NULL;
     }
+    ShowWindow(hBtnBW, SW_HIDE); // 버튼 상태 초기화
+    ShowWindow(hBtnBW_MMX, SW_HIDE); // MMX 버튼 상태 초기화
 }
 
-// 컬러 비트맵을 흑백 비트맵으로 변환하는 함수
+// 컬러 비트맵을 흑백 비트맵으로 변환하는 함수 (32비트 기준)
 HBITMAP ConvertColorToBW(HBITMAP hSrcBmp) {
     if (!hSrcBmp) return NULL;
 
@@ -50,7 +56,7 @@ HBITMAP ConvertColorToBW(HBITMAP hSrcBmp) {
 
     int width = bmp.bmWidth;
     int height = bmp.bmHeight;
-    int bytesPerPixel = 3; // 24비트
+    int bytesPerPixel = 4; // 32비트
     int stride = ((width * bytesPerPixel + 3) & ~3);
 
     // 입력 버퍼 준비
@@ -63,7 +69,7 @@ HBITMAP ConvertColorToBW(HBITMAP hSrcBmp) {
     bmi.bmiHeader.biWidth = width;
     bmi.bmiHeader.biHeight = -height; // 상단이 원점
     bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 24;
+    bmi.bmiHeader.biBitCount = 32; // 32비트로 변경
     bmi.bmiHeader.biCompression = BI_RGB;
 
     HDC hdc = GetDC(NULL);
@@ -73,7 +79,7 @@ HBITMAP ConvertColorToBW(HBITMAP hSrcBmp) {
     // 시간 측정 및 1000번 반복
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 1000; ++i) {
-        ConvertRGBToBW(bufIn, bufOut, width, height);
+        ConvertRGBAToBW(bufIn, bufOut, width, height); // RGBA용 함수여야 함
     }
     auto end = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double, std::milli>(end - start).count();
@@ -92,6 +98,114 @@ HBITMAP ConvertColorToBW(HBITMAP hSrcBmp) {
     delete[] bufOut;
 
     return hDstBmp;
+}
+
+// MMX 버전도 동일하게 32비트로 변경
+HBITMAP ConvertColorToBW_MMX(HBITMAP hSrcBmp) {
+    if (!hSrcBmp) return NULL;
+
+    BITMAP bmp;
+    GetObject(hSrcBmp, sizeof(BITMAP), &bmp);
+
+    int width = bmp.bmWidth;
+    int height = bmp.bmHeight;
+    int bytesPerPixel = 4; // 32비트
+    int stride = ((width * bytesPerPixel + 3) & ~3);
+
+    // 입력 버퍼 준비
+    unsigned char* bufIn = new unsigned char[stride * height];
+    unsigned char* bufOut = new unsigned char[stride * height];
+
+    // 원본 비트맵에서 픽셀 데이터 추출
+    BITMAPINFO bmi = { 0 };
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height; // 상단이 원점
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32; // 32비트로 변경
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    HDC hdc = GetDC(NULL);
+    GetDIBits(hdc, hSrcBmp, 0, height, bufIn, &bmi, DIB_RGB_COLORS);
+    ReleaseDC(NULL, hdc);
+
+    // 시간 측정 및 1000번 반복
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 1000; ++i) {
+        ConvertRGBAToBW_MMX_(bufIn, bufOut, width, height); // RGBA용 함수여야 함
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double, std::milli>(end - start).count();
+
+    // 시간 문자열 저장
+    swprintf(g_bwTimeStr, 128, L"흑백 변환 1000회 실행 시간: %.2f ms", elapsed);
+
+    // 결과로 DIBSection 생성
+    void* pBits = nullptr;
+    HBITMAP hDstBmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
+    if (hDstBmp && pBits) {
+        memcpy(pBits, bufOut, stride * height);
+    }
+
+    delete[] bufIn;
+    delete[] bufOut;
+
+    return hDstBmp;
+}
+
+// 32비트 BMP 파일을 직접 읽어서 HBITMAP으로 반환
+HBITMAP LoadBitmap32FromFile(const wchar_t* filename, int* outWidth = nullptr, int* outHeight = nullptr)
+{
+    std::ifstream file(filename, std::ios::binary);
+    if (!file) return NULL;
+
+    BITMAPFILEHEADER header;
+    BITMAPINFOHEADER info;
+    file.read(reinterpret_cast<char*>(&header), sizeof(header));
+    file.read(reinterpret_cast<char*>(&info), sizeof(info));
+
+    if (header.bfType != 0x4D42 || info.biBitCount != 32 /*|| info.biCompression != 0*/) {
+        // BMP magic number, 32bpp, BI_RGB(0)만 지원
+        return NULL;
+    }
+
+    int width = info.biWidth;
+    int height = abs(info.biHeight);
+    int stride = ((width * 4 + 3) & ~3);
+
+    // 파일에서 픽셀 데이터 읽기
+    std::vector<unsigned char> buf(stride * height);
+    file.seekg(header.bfOffBits, std::ios::beg);
+    file.read(reinterpret_cast<char*>(buf.data()), stride * height);
+
+    // BMP는 하단이 원점이므로, biHeight < 0 이 아니면 상하 반전 필요
+    bool flip = (info.biHeight > 0);
+
+    // DIBSection 생성
+    BITMAPINFO bmi = { 0 };
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height; // 항상 상단이 원점
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    void* pBits = nullptr;
+    HBITMAP hBmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
+    if (!hBmp || !pBits) return NULL;
+
+    if (flip) {
+        // 하단이 원점인 BMP는 상하 반전해서 복사
+        for (int y = 0; y < height; ++y) {
+            memcpy((BYTE*)pBits + y * stride, buf.data() + (height - 1 - y) * stride, stride);
+        }
+    } else {
+        memcpy(pBits, buf.data(), stride * height);
+    }
+
+    if (outWidth) *outWidth = width;
+    if (outHeight) *outHeight = height;
+    return hBmp;
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -208,7 +322,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         hBtnBW = CreateWindowW(L"BUTTON", L"흑백변환",
             WS_CHILD | WS_VISIBLE,
             10, 10, 100, 30, hWnd, (HMENU)IDC_BTN_BW, hInst, NULL);
+        hBtnBW_MMX = CreateWindowW(L"BUTTON", L"MMX 흑백변환",
+            WS_CHILD | WS_VISIBLE,
+            120, 10, 120, 30, hWnd, (HMENU)IDC_BTN_BW_MMX, hInst, NULL);
         ShowWindow(hBtnBW, SW_HIDE);
+        ShowWindow(hBtnBW_MMX, SW_HIDE);
         break;
 
     case WM_COMMAND:
@@ -233,14 +351,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                     if (GetOpenFileName(&ofn)) {
                         ReleaseBitmap();
-                        hBitmap = (HBITMAP)LoadImageW(NULL, szFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+                        hBitmap = LoadBitmap32FromFile(szFile, &imgWidth, &imgHeight);
                         if (hBitmap) {
                             wcscpy_s(szBmpFile, szFile);
                             hBitmapBW = NULL;
-                            BITMAP bmp;
-                            GetObject(hBitmap, sizeof(BITMAP), &bmp);
-                            imgWidth = bmp.bmWidth;
-                            imgHeight = bmp.bmHeight;
                             RECT rc;
                             GetClientRect(hWnd, &rc);
 
@@ -248,7 +362,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             int btnX = 10;
                             int btnY = imgHeight + 10 + imgHeight + 20 - yScrollPos;
                             SetWindowPos(hBtnBW, NULL, btnX, btnY, 100, 30, SWP_SHOWWINDOW);
+                            SetWindowPos(hBtnBW_MMX, NULL, btnX + 110, btnY, 120, 30, SWP_SHOWWINDOW);
                             ShowWindow(hBtnBW, SW_SHOW);
+                            ShowWindow(hBtnBW_MMX, SW_SHOW);
 
                             // 스크롤바 설정 (세로: 원본+흑백+버튼)
                             int totalHeight = imgHeight + 10 + imgHeight + 10 + 30; // 원본 + 간격 + 흑백 + 간격 + 버튼
@@ -273,6 +389,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDC_BTN_BW:
                 if (hBitmap && !hBitmapBW) {
                     hBitmapBW = ConvertColorToBW(hBitmap);
+                    InvalidateRect(hWnd, NULL, TRUE);
+                }
+                break;
+            case IDC_BTN_BW_MMX:
+                if (hBitmap && !hBitmapBW) {
+                    hBitmapBW = ConvertColorToBW_MMX(hBitmap);
                     InvalidateRect(hWnd, NULL, TRUE);
                 }
                 break;
@@ -304,6 +426,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             int btnX = 10;
             int btnY = imgHeight + 10 + (hBitmapBW ? imgHeight + 20 : 20) - yScrollPos;
             SetWindowPos(hBtnBW, NULL, btnX, btnY, 100, 30, SWP_NOZORDER);
+            SetWindowPos(hBtnBW_MMX, NULL, btnX + 110, btnY, 120, 30, SWP_NOZORDER);
         }
         break;
 
@@ -348,6 +471,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 int btnX = 10;
                 int btnY = imgHeight + 10 + (hBitmapBW ? imgHeight + 20 : 20) - yScrollPos;
                 SetWindowPos(hBtnBW, NULL, btnX, btnY, 100, 30, SWP_NOZORDER);
+                SetWindowPos(hBtnBW_MMX, NULL, btnX + 110, btnY, 120, 30, SWP_NOZORDER);
                 InvalidateRect(hWnd, NULL, TRUE);
             }
         }
@@ -371,6 +495,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             int btnX = 10;
             int btnY = imgHeight + 10 + (hBitmapBW ? imgHeight + 20 : 20) - yScrollPos;
             SetWindowPos(hBtnBW, NULL, btnX, btnY, 100, 30, SWP_NOZORDER);
+            SetWindowPos(hBtnBW_MMX, NULL, btnX + 110, btnY, 120, 30, SWP_NOZORDER);
 
             InvalidateRect(hWnd, NULL, TRUE);
         }

@@ -38,9 +38,6 @@
     <ClCompile Include="ImageProcessC.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ImageProcessMMX.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TermProject.rc">
@@ -54,5 +51,13 @@
     <Image Include="TermProject.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="ImageProcessMMX.asm">
+      <Filter>소스 파일</Filter>
+    </MASM>
+    <MASM Include="ImageProcessSSE.asm">
+      <Filter>소스 파일</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

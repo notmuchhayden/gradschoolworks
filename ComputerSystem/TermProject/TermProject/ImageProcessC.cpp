@@ -7,9 +7,9 @@ void ConvertRGBToBW(unsigned char* bufIn, unsigned char* bufOut, int nWidth, int
 	int nWidth3 = nWidth * 3;
 	for (j = 0; j < nHeight; j++) {
 		for (i = 0; i < nWidth3; i += 3) {
-			nValue =	bufIn[i + j * nWidth3 + 0] * 0.299 + 
-						bufIn[i + j * nWidth3 + 1] * 0.587 + 
-						bufIn[i + j * nWidth3 + 2] * 0.114;
+			nValue =	bufIn[i + j * nWidth3 + 0] * 0.299f + 
+						bufIn[i + j * nWidth3 + 1] * 0.587f + 
+						bufIn[i + j * nWidth3 + 2] * 0.114f;
 
 			bufOut[i + j * nWidth3 + 0] = nValue;
 			bufOut[i + j * nWidth3 + 1] = nValue;
