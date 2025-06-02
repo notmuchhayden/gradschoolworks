@@ -25,9 +25,9 @@ ConvertRGBAToBW_MMX_ PROC
     pxor    mm7, mm7             ; mm7 = 0 (zero register)
 
     xor     r12d, r12d           ; j = 0 (row)
-row_loop:
+HeightLoop:
     xor     r13d, r13d           ; i = 0 (col)
-col_loop:
+WidthLoop:
     mov     rax, r12
     imul    rax, r10
     add     rax, r13
@@ -79,11 +79,11 @@ col_loop:
 
     add     r13d, 8
     cmp     r13d, r10d
-    jl      col_loop
+    jl      WidthLoop
 
     inc     r12d
     cmp     r12d, r11d
-    jl      row_loop
+    jl      HeightLoop
 
     emms
     pop     rdi

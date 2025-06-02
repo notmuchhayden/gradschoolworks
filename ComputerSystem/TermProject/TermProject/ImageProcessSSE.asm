@@ -36,12 +36,12 @@ ConvertRGBAToBW_SSE_ PROC
     movaps  xmm5, g_fWeightG
     movaps  xmm6, g_fWeightB
 
-RowLoop:
+HeightLoop:
     cmp     r11d, edx
     jge     Done
 
     xor     r8d, r8d                ; i = 0 (col)
-PixelLoop:
+WidthLoop:
     cmp     r8d, r10d
     jge     NextRow
 
@@ -52,30 +52,30 @@ PixelLoop:
     movdqu  xmm0, xmmword ptr [rsi + rax] ; 4픽셀(RGBA*4) 로드
 
     ; R 추출 및 변환
-    movdqa  xmm1, xmm0
-    pand    xmm1, xmmword ptr g_maskR
-    psrld   xmm1, 16
-    packusdw xmm1, xmm1
-    punpcklbw xmm1, xmmword ptr [zero16] ; zero-extend to 16bit
-    cvtdq2ps xmm1, xmm1
-    mulps   xmm1, xmm4
+    movdqa  xmm1, xmm0                        ; xmm0(입력)에서 복사하여 xmm1에 저장
+    pand    xmm1, xmmword ptr g_maskR         ; R 채널만 남기고 나머지 비트 0으로 마스킹
+    psrld   xmm1, 16                          ; R 채널을 하위 바이트로 이동 (각 픽셀별 16비트 오른쪽 시프트)
+    packusdw xmm1, xmm1                       ; 32비트 값을 16비트로 압축(포장)
+    punpcklbw xmm1, xmmword ptr [zero16]      ; 8비트 값을 16비트로 zero-extend
+    cvtdq2ps xmm1, xmm1                       ; 16비트 정수를 float로 변환
+    mulps   xmm1, xmm4                        ; R 가중치(0.299f) 곱셈
 
     ; G 추출 및 변환
-    movdqa  xmm2, xmm0
-    pand    xmm2, xmmword ptr g_maskG
-    psrld   xmm2, 8
-    packusdw xmm2, xmm2
-    punpcklbw xmm2, xmmword ptr [zero16]
-    cvtdq2ps xmm2, xmm2
-    mulps   xmm2, xmm5
+    movdqa  xmm2, xmm0                        ; xmm0(입력)에서 복사하여 xmm2에 저장
+    pand    xmm2, xmmword ptr g_maskG         ; G 채널만 남기고 나머지 비트 0으로 마스킹
+    psrld   xmm2, 8                           ; G 채널을 하위 바이트로 이동 (각 픽셀별 8비트 오른쪽 시프트)
+    packusdw xmm2, xmm2                       ; 32비트 값을 16비트로 압축(포장)
+    punpcklbw xmm2, xmmword ptr [zero16]      ; 8비트 값을 16비트로 zero-extend
+    cvtdq2ps xmm2, xmm2                       ; 16비트 정수를 float로 변환
+    mulps   xmm2, xmm5                        ; G 가중치(0.587f) 곱셈
 
     ; B 추출 및 변환
-    movdqa  xmm3, xmm0
-    pand    xmm3, xmmword ptr g_maskB
-    packusdw xmm3, xmm3
-    punpcklbw xmm3, xmmword ptr [zero16]
-    cvtdq2ps xmm3, xmm3
-    mulps   xmm3, xmm6
+    movdqa  xmm3, xmm0                        ; xmm0(입력)에서 복사하여 xmm3에 저장
+    pand    xmm3, xmmword ptr g_maskB         ; B 채널만 남기고 나머지 비트 0으로 마스킹
+    packusdw xmm3, xmm3                       ; 32비트 값을 16비트로 압축(포장)
+    punpcklbw xmm3, xmmword ptr [zero16]      ; 8비트 값을 16비트로 zero-extend
+    cvtdq2ps xmm3, xmm3                       ; 16비트 정수를 float로 변환
+    mulps   xmm3, xmm6                        ; B 가중치(0.114f) 곱셈
 
     ; R+G+B 합산
     addps   xmm1, xmm2
@@ -107,11 +107,11 @@ PixelLoop:
     movdqu  xmmword ptr [rdi + rax], xmm1
 
     add     r8d, 16
-    jmp     PixelLoop
+    jmp     WidthLoop
 
 NextRow:
     inc     r11d
-    jmp     RowLoop
+    jmp     HeightLoop
 
 Done:
     pop     r15
@@ -123,7 +123,6 @@ Done:
     pop     rbp
     pop     rbx
     ret
-
 
 ConvertRGBAToBW_SSE_ ENDP
 end
