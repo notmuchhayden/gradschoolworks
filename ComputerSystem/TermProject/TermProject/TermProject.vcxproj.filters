@@ -38,6 +38,9 @@
     <ClCompile Include="ConvertBW_C.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Sharpen_C.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TermProject.rc">
@@ -57,6 +60,12 @@
       <Filter>소스 파일</Filter>
     </MASM>
     <MASM Include="ConvertBW_SSE.asm">
+      <Filter>소스 파일</Filter>
+    </MASM>
+    <MASM Include="Sharpen_MMX.asm">
+      <Filter>소스 파일</Filter>
+    </MASM>
+    <MASM Include="Sharpen_SSE.asm">
       <Filter>소스 파일</Filter>
     </MASM>
   </ItemGroup>

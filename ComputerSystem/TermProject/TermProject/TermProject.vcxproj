@@ -107,7 +107,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AddModuleNamesToAssembly>ConvertBW_MMX.asm;ConvertBW_SSE.asm;%(AddModuleNamesToAssembly)</AddModuleNamesToAssembly>
+      <AddModuleNamesToAssembly>ConvertBW_MMX.asm;ConvertBW_SSE.asm;Sharpen_MMX.asm;Sharpen_SSE.asm;%(AddModuleNamesToAssembly)</AddModuleNamesToAssembly>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConvertBW_C.cpp" />
+    <ClCompile Include="Sharpen_C.cpp" />
     <ClCompile Include="TermProject.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +149,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </MASM>
     <MASM Include="ConvertBW_SSE.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </MASM>
+    <MASM Include="Sharpen_MMX.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </MASM>
+    <MASM Include="Sharpen_SSE.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </MASM>
   </ItemGroup>

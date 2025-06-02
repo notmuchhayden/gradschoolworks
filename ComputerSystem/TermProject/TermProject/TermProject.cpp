@@ -13,6 +13,9 @@
 #define MAX_LOADSTRING 100
 #define IDC_BTN_BW_MMX 2001 // 버튼 ID 추가
 #define IDC_BTN_BW_SSE 2002 // SSE 버튼 ID 추가
+#define IDC_BTN_SHARPEN_C    3001
+#define IDC_BTN_SHARPEN_MMX  3002
+#define IDC_BTN_SHARPEN_SSE  3003
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -22,10 +25,16 @@ HBITMAP hBitmap = NULL;                         // 전역 비트맵 핸들
 HBITMAP hBitmapBW = NULL;                       // 흑백 비트맵 핸들 추가
 HBITMAP hBitmapBW_MMX = NULL;                   // MMX 변환 비트맵 핸들 추가
 HBITMAP hBitmapBW_SSE = NULL;                   // SSE 변환 비트맵 핸들 추가
+HBITMAP hBitmapSharpenC = NULL;
+HBITMAP hBitmapSharpenMMX = NULL;
+HBITMAP hBitmapSharpenSSE = NULL;
 WCHAR szBmpFile[MAX_PATH] = L"";                // 선택된 파일 경로
 HWND hBtnBW = NULL;                             // 흑백변환 버튼 핸들
 HWND hBtnBW_MMX = NULL;                         // MMX 흑백변환 버튼 핸들 추가
 HWND hBtnBW_SSE = NULL;                         // SSE 버튼 핸들 추가
+HWND hBtnSharpenC = NULL;
+HWND hBtnSharpenMMX = NULL;
+HWND hBtnSharpenSSE = NULL;
 WCHAR g_bwTimeStr[128] = L"";                   // 흑백 변환 시간 문자열
 
 int xScrollPos = 0, yScrollPos = 0;             // 스크롤 위치
@@ -55,9 +64,24 @@ void ReleaseBitmap() {
         DeleteObject(hBitmapBW_SSE);
         hBitmapBW_SSE = NULL;
     }
+    if (hBitmapSharpenC) {
+        DeleteObject(hBitmapSharpenC);
+        hBitmapSharpenC = NULL;
+    }
+    if (hBitmapSharpenMMX) {
+        DeleteObject(hBitmapSharpenMMX);
+        hBitmapSharpenMMX = NULL;
+    }
+    if (hBitmapSharpenSSE) {
+        DeleteObject(hBitmapSharpenSSE);
+        hBitmapSharpenSSE = NULL;
+    }
     ShowWindow(hBtnBW, SW_HIDE); // 버튼 상태 초기화
     ShowWindow(hBtnBW_MMX, SW_HIDE); // MMX 버튼 상태 초기화
     ShowWindow(hBtnBW_SSE, SW_HIDE); // SSE 버튼 상태 초기화
+    ShowWindow(hBtnSharpenC, SW_HIDE); // Sharpen C 버튼 상태 초기화
+    ShowWindow(hBtnSharpenMMX, SW_HIDE); // Sharpen MMX 버튼 상태 초기화
+    ShowWindow(hBtnSharpenSSE, SW_HIDE); // Sharpen SSE 버튼 상태 초기화
 }
 
 // 컬러 비트맵을 흑백 비트맵으로 변환하는 함수 (32비트 기준)
@@ -218,6 +242,166 @@ HBITMAP ConvertColorToBW_SSE(HBITMAP hSrcBmp) {
 
     return hDstBmp;
 }
+
+// 컬러 비트맵을 흑백 비트맵으로 변환하는 함수 (32비트 기준)
+HBITMAP SharpenC(HBITMAP hSrcBmp) {
+    if (!hSrcBmp) return NULL;
+
+    BITMAP bmp;
+    GetObject(hSrcBmp, sizeof(BITMAP), &bmp);
+
+    int width = bmp.bmWidth;
+    int height = bmp.bmHeight;
+    int bytesPerPixel = 4; // 32비트
+    int stride = ((width * bytesPerPixel + 3) & ~3);
+
+    // 입력 버퍼 준비
+    unsigned char* bufIn = new unsigned char[stride * height];
+    unsigned char* bufOut = new unsigned char[stride * height];
+
+    // 원본 비트맵에서 픽셀 데이터 추출
+    BITMAPINFO bmi = { 0 };
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height; // 상단이 원점
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32; // 32비트로 변경
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    HDC hdc = GetDC(NULL);
+    GetDIBits(hdc, hSrcBmp, 0, height, bufIn, &bmi, DIB_RGB_COLORS);
+    ReleaseDC(NULL, hdc);
+
+    // 시간 측정 및 1000번 반복
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 1000; ++i) {
+        Sharpen_C(bufIn, bufOut, width, height); // RGBA용 함수여야 함
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double, std::milli>(end - start).count();
+
+    // 시간 문자열 저장
+    swprintf(g_bwTimeStr, 128, L"Sharpen 1000회 실행 시간: %.2f ms", elapsed);
+
+    // 결과로 DIBSection 생성
+    void* pBits = nullptr;
+    HBITMAP hDstBmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
+    if (hDstBmp && pBits) {
+        memcpy(pBits, bufOut, stride * height);
+    }
+
+    delete[] bufIn;
+    delete[] bufOut;
+
+    return hDstBmp;
+}
+
+// MMX 버전도 동일하게 32비트로 변경
+HBITMAP Sharpen_MMX(HBITMAP hSrcBmp) {
+    if (!hSrcBmp) return NULL;
+
+    BITMAP bmp;
+    GetObject(hSrcBmp, sizeof(BITMAP), &bmp);
+
+    int width = bmp.bmWidth;
+    int height = bmp.bmHeight;
+    int bytesPerPixel = 4; // 32비트
+    int stride = ((width * bytesPerPixel + 3) & ~3);
+
+    // 입력 버퍼 준비
+    unsigned char* bufIn = new unsigned char[stride * height];
+    unsigned char* bufOut = new unsigned char[stride * height];
+
+    // 원본 비트맵에서 픽셀 데이터 추출
+    BITMAPINFO bmi = { 0 };
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height; // 상단이 원점
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32; // 32비트로 변경
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    HDC hdc = GetDC(NULL);
+    GetDIBits(hdc, hSrcBmp, 0, height, bufIn, &bmi, DIB_RGB_COLORS);
+    ReleaseDC(NULL, hdc);
+
+    // 시간 측정 및 1000번 반복
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 1000; ++i) {
+        Sharpen_MMX_(bufIn, bufOut, width, height); // RGBA용 함수여야 함
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double, std::milli>(end - start).count();
+
+    // 시간 문자열 저장
+    swprintf(g_bwTimeStr, 128, L"Sharpen  1000회 실행 시간: %.2f ms", elapsed);
+
+    // 결과로 DIBSection 생성
+    void* pBits = nullptr;
+    HBITMAP hDstBmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
+    if (hDstBmp && pBits) {
+        memcpy(pBits, bufOut, stride * height);
+    }
+
+    delete[] bufIn;
+    delete[] bufOut;
+
+    return hDstBmp;
+}
+
+// MMX 버전도 동일하게 32비트로 변경
+HBITMAP Sharpen_SSE(HBITMAP hSrcBmp) {
+    if (!hSrcBmp) return NULL;
+
+    BITMAP bmp;
+    GetObject(hSrcBmp, sizeof(BITMAP), &bmp);
+
+    int width = bmp.bmWidth;
+    int height = bmp.bmHeight;
+    int bytesPerPixel = 4; // 32비트
+    int stride = ((width * bytesPerPixel + 3) & ~3);
+
+    // 입력 버퍼 준비
+    unsigned char* bufIn = new unsigned char[stride * height];
+    unsigned char* bufOut = new unsigned char[stride * height];
+
+    // 원본 비트맵에서 픽셀 데이터 추출
+    BITMAPINFO bmi = { 0 };
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height; // 상단이 원점
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32; // 32비트로 변경
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    HDC hdc = GetDC(NULL);
+    GetDIBits(hdc, hSrcBmp, 0, height, bufIn, &bmi, DIB_RGB_COLORS);
+    ReleaseDC(NULL, hdc);
+
+    // 시간 측정 및 1000번 반복
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < 1000; ++i) {
+        Sharpen_SSE_(bufIn, bufOut, width, height); // RGBA용 함수여야 함
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    double elapsed = std::chrono::duration<double, std::milli>(end - start).count();
+
+    // 시간 문자열 저장
+    swprintf(g_bwTimeStr, 128, L"Sharpen  1000회 실행 시간: %.2f ms", elapsed);
+
+    // 결과로 DIBSection 생성
+    void* pBits = nullptr;
+    HBITMAP hDstBmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
+    if (hDstBmp && pBits) {
+        memcpy(pBits, bufOut, stride * height);
+    }
+
+    delete[] bufIn;
+    delete[] bufOut;
+
+    return hDstBmp;
+}
+
 
 // 32비트 BMP 파일을 직접 읽어서 HBITMAP으로 반환
 HBITMAP LoadBitmap32FromFile(const wchar_t* filename, int* outWidth = nullptr, int* outHeight = nullptr)
@@ -385,18 +569,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_CREATE:
-        hBtnBW = CreateWindowW(L"BUTTON", L"흑백변환",
+        hBtnBW = CreateWindowW(L"BUTTON", L"흑백변환 C",
             WS_CHILD | WS_VISIBLE,
-            10, 10, 100, 30, hWnd, (HMENU)IDC_BTN_BW, hInst, NULL);
-        hBtnBW_MMX = CreateWindowW(L"BUTTON", L"MMX 흑백변환",
+            10, 40, 100, 30, hWnd, (HMENU)IDC_BTN_BW, hInst, NULL);
+        hBtnBW_MMX = CreateWindowW(L"BUTTON", L"흑백변환 MMX",
             WS_CHILD | WS_VISIBLE,
-            120, 10, 120, 30, hWnd, (HMENU)IDC_BTN_BW_MMX, hInst, NULL);
-        hBtnBW_SSE = CreateWindowW(L"BUTTON", L"SSE 흑백변환",
+            120, 40, 120, 30, hWnd, (HMENU)IDC_BTN_BW_MMX, hInst, NULL);
+        hBtnBW_SSE = CreateWindowW(L"BUTTON", L"흑백변환 SSE",
             WS_CHILD | WS_VISIBLE,
-            250, 10, 120, 30, hWnd, (HMENU)IDC_BTN_BW_SSE, hInst, NULL);
+            250, 40, 120, 30, hWnd, (HMENU)IDC_BTN_BW_SSE, hInst, NULL);
+        hBtnSharpenC = CreateWindowW(L"BUTTON", L"Sharpen C",
+            WS_CHILD | WS_VISIBLE,
+            380, 40, 120, 30, hWnd, (HMENU)IDC_BTN_SHARPEN_C, hInst, NULL);
+        hBtnSharpenMMX = CreateWindowW(L"BUTTON", L"Sharpen MMX",
+            WS_CHILD | WS_VISIBLE,
+            510, 40, 120, 30, hWnd, (HMENU)IDC_BTN_SHARPEN_MMX, hInst, NULL);
+        hBtnSharpenSSE = CreateWindowW(L"BUTTON", L"Sharpen SSE",
+            WS_CHILD | WS_VISIBLE,
+            640, 40, 120, 30, hWnd, (HMENU)IDC_BTN_SHARPEN_SSE, hInst, NULL);
         ShowWindow(hBtnBW, SW_HIDE);
         ShowWindow(hBtnBW_MMX, SW_HIDE);
         ShowWindow(hBtnBW_SSE, SW_HIDE);
+        ShowWindow(hBtnSharpenC, SW_HIDE);
+        ShowWindow(hBtnSharpenMMX, SW_HIDE);
+        ShowWindow(hBtnSharpenSSE, SW_HIDE);
         break;
 
     case WM_COMMAND:
@@ -427,20 +623,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             hBitmapBW = NULL;
                             hBitmapBW_MMX = NULL;
                             hBitmapBW_SSE = NULL;
+                            hBitmapSharpenC = NULL;
+                            hBitmapSharpenMMX = NULL;
+                            hBitmapSharpenSSE = NULL;
                             RECT rc;
                             GetClientRect(hWnd, &rc);
 
                             // 버튼 위치 계산 (가로로)
-                            int btnY = imgHeight + 20 - yScrollPos;
+                            int btnY = imgHeight + 40 - yScrollPos;
                             SetWindowPos(hBtnBW, NULL, 10, btnY, 100, 30, SWP_SHOWWINDOW);
                             SetWindowPos(hBtnBW_MMX, NULL, 120, btnY, 120, 30, SWP_SHOWWINDOW);
                             SetWindowPos(hBtnBW_SSE, NULL, 250, btnY, 120, 30, SWP_SHOWWINDOW);
+                            SetWindowPos(hBtnSharpenC, NULL, 380, btnY, 120, 30, SWP_SHOWWINDOW);
+                            SetWindowPos(hBtnSharpenMMX, NULL, 510, btnY, 120, 30, SWP_SHOWWINDOW);
+                            SetWindowPos(hBtnSharpenSSE, NULL, 640, btnY, 120, 30, SWP_SHOWWINDOW);
                             ShowWindow(hBtnBW, SW_SHOW);
                             ShowWindow(hBtnBW_MMX, SW_SHOW);
                             ShowWindow(hBtnBW_SSE, SW_SHOW);
+                            ShowWindow(hBtnSharpenC, SW_SHOW);
+                            ShowWindow(hBtnSharpenMMX, SW_SHOW);
+                            ShowWindow(hBtnSharpenSSE, SW_SHOW);
 
                             // 스크롤바 설정 (가로: 원본+변환*3, 세로: 이미지+버튼)
-                            int totalWidth = imgWidth * (1 + (hBitmapBW ? 1 : 0) + (hBitmapBW_MMX ? 1 : 0) + (hBitmapBW_SSE ? 1 : 0));
+                            int totalWidth = imgWidth * (1 + (hBitmapBW ? 1 : 0) + (hBitmapBW_MMX ? 1 : 0) + (hBitmapBW_SSE ? 1 : 0) + (hBitmapSharpenC ? 1 : 0) + (hBitmapSharpenMMX ? 1 : 0) + (hBitmapSharpenSSE ? 1 : 0));
                             int totalHeight = imgHeight + 10 + 30;
                             SCROLLINFO si = { sizeof(SCROLLINFO), SIF_RANGE | SIF_PAGE };
                             si.nMin = 0;
@@ -478,6 +683,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     InvalidateRect(hWnd, NULL, TRUE);
                 }
                 break;
+            case IDC_BTN_SHARPEN_C:
+                if (hBitmap && !hBitmapSharpenC) {
+                    hBitmapSharpenC = SharpenC(hBitmap);
+                    InvalidateRect(hWnd, NULL, TRUE);
+                }
+                break;
+            case IDC_BTN_SHARPEN_MMX:
+                if (hBitmap && !hBitmapSharpenMMX) {
+                    hBitmapSharpenMMX = Sharpen_MMX(hBitmap);
+                    InvalidateRect(hWnd, NULL, TRUE);
+                }
+                break;
+            case IDC_BTN_SHARPEN_SSE:
+                if (hBitmap && !hBitmapSharpenSSE) {
+                    hBitmapSharpenSSE = Sharpen_SSE(hBitmap);
+                    InvalidateRect(hWnd, NULL, TRUE);
+                }
+                break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
@@ -491,7 +714,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             RECT rc;
             GetClientRect(hWnd, &rc);
-            int nImages = 1 + (hBitmapBW ? 1 : 0) + (hBitmapBW_MMX ? 1 : 0) + (hBitmapBW_SSE ? 1 : 0);
+            int nImages = 1 + (hBitmapBW ? 1 : 0) + (hBitmapBW_MMX ? 1 : 0) + (hBitmapBW_SSE ? 1 : 0) + (hBitmapSharpenC ? 1 : 0) + (hBitmapSharpenMMX ? 1 : 0) + (hBitmapSharpenSSE ? 1 : 0);
             int totalWidth = imgWidth * nImages;
             int totalHeight = imgHeight + 10 + 30;
             SCROLLINFO si = { sizeof(SCROLLINFO), SIF_RANGE | SIF_PAGE };
@@ -505,10 +728,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
             yMaxScroll = max(0, totalHeight - (rc.bottom - rc.top));
             // 버튼 위치 조정 (가로로)
-            int btnY = imgHeight + 20 - yScrollPos;
+            int btnY = imgHeight + 40 - yScrollPos;
             SetWindowPos(hBtnBW, NULL, 10, btnY, 100, 30, SWP_NOZORDER);
             SetWindowPos(hBtnBW_MMX, NULL, 120, btnY, 120, 30, SWP_NOZORDER);
             SetWindowPos(hBtnBW_SSE, NULL, 250, btnY, 120, 30, SWP_NOZORDER);
+            SetWindowPos(hBtnSharpenC, NULL, 380, btnY, 120, 30, SWP_NOZORDER);
+            SetWindowPos(hBtnSharpenMMX, NULL, 510, btnY, 120, 30, SWP_NOZORDER);
+            SetWindowPos(hBtnSharpenSSE, NULL, 640, btnY, 120, 30, SWP_NOZORDER);
         }
         break;
 
@@ -549,10 +775,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             if (yScrollPos != prevPos) {
                 SetScrollPos(hWnd, SB_VERT, yScrollPos, TRUE);
-                int btnY = imgHeight + 20 - yScrollPos;
+                int btnY = imgHeight + 40 - yScrollPos;
                 SetWindowPos(hBtnBW, NULL, 10, btnY, 100, 30, SWP_NOZORDER);
                 SetWindowPos(hBtnBW_MMX, NULL, 120, btnY, 120, 30, SWP_NOZORDER);
                 SetWindowPos(hBtnBW_SSE, NULL, 250, btnY, 120, 30, SWP_NOZORDER);
+                SetWindowPos(hBtnSharpenC, NULL, 380, btnY, 120, 30, SWP_NOZORDER);
+                SetWindowPos(hBtnSharpenMMX, NULL, 510, btnY, 120, 30, SWP_NOZORDER);
+                SetWindowPos(hBtnSharpenSSE, NULL, 640, btnY, 120, 30, SWP_NOZORDER);
                 InvalidateRect(hWnd, NULL, TRUE);
             }
         }
@@ -573,10 +802,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SetScrollPos(hWnd, SB_VERT, yScrollPos, TRUE);
 
             // 버튼 위치도 갱신
-            int btnY = imgHeight + 20 - yScrollPos;
+            int btnY = imgHeight + 40 - yScrollPos;
             SetWindowPos(hBtnBW, NULL, 10, btnY, 100, 30, SWP_NOZORDER);
             SetWindowPos(hBtnBW_MMX, NULL, 120, btnY, 120, 30, SWP_NOZORDER);
             SetWindowPos(hBtnBW_SSE, NULL, 250, btnY, 120, 30, SWP_NOZORDER);
+            SetWindowPos(hBtnSharpenC, NULL, 380, btnY, 120, 30, SWP_NOZORDER);
+            SetWindowPos(hBtnSharpenMMX, NULL, 510, btnY, 120, 30, SWP_NOZORDER);
+            SetWindowPos(hBtnSharpenSSE, NULL, 640, btnY, 120, 30, SWP_NOZORDER);
 
             InvalidateRect(hWnd, NULL, TRUE);
         }
@@ -589,33 +821,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             int yOffset = -yScrollPos;
             int xOffset = -xScrollPos;
             int curX = xOffset;
+            int curY = yOffset;
+
             if (hBitmap) {
+                // 1. 첫 줄: 원본 및 흑백/샤픈 이미지 가로 나열
                 HDC hMemDC = CreateCompatibleDC(hdc);
                 HBITMAP hOldBmp = (HBITMAP)SelectObject(hMemDC, hBitmap);
-
                 BITMAP bmp;
                 GetObject(hBitmap, sizeof(BITMAP), &bmp);
-                // 원본 비트맵을 (curX, yOffset)에 출력
-                BitBlt(hdc, curX, yOffset, bmp.bmWidth, bmp.bmHeight, hMemDC, 0, 0, SRCCOPY);
+                BitBlt(hdc, curX, curY, bmp.bmWidth, bmp.bmHeight, hMemDC, 0, 0, SRCCOPY);
                 curX += bmp.bmWidth;
-
                 SelectObject(hMemDC, hOldBmp);
                 DeleteDC(hMemDC);
 
-                // 변환 이미지들 오른쪽에 순서대로 출력
                 if (hBitmapBW) {
                     HDC hMemDCBW = CreateCompatibleDC(hdc);
                     HBITMAP hOldBmpBW = (HBITMAP)SelectObject(hMemDCBW, hBitmapBW);
                     BITMAP bmpBW;
                     GetObject(hBitmapBW, sizeof(BITMAP), &bmpBW);
-                    BitBlt(hdc, curX, yOffset, bmpBW.bmWidth, bmpBW.bmHeight, hMemDCBW, 0, 0, SRCCOPY);
-                    // 시간 문자열 출력 (이미지 하단)
-                    if (g_bwTimeStr[0]) {
-                        int textY = yOffset + bmpBW.bmHeight + 10;
-                        SetBkMode(hdc, TRANSPARENT);
-                        SetTextColor(hdc, RGB(0,0,0));
-                        TextOutW(hdc, curX + 10, textY, g_bwTimeStr, (int)wcslen(g_bwTimeStr));
-                    }
+                    BitBlt(hdc, curX, curY, bmpBW.bmWidth, bmpBW.bmHeight, hMemDCBW, 0, 0, SRCCOPY);
                     curX += bmpBW.bmWidth;
                     SelectObject(hMemDCBW, hOldBmpBW);
                     DeleteDC(hMemDCBW);
@@ -625,7 +849,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     HBITMAP hOldBmpBW = (HBITMAP)SelectObject(hMemDCBW, hBitmapBW_MMX);
                     BITMAP bmpBW;
                     GetObject(hBitmapBW_MMX, sizeof(BITMAP), &bmpBW);
-                    BitBlt(hdc, curX, yOffset, bmpBW.bmWidth, bmpBW.bmHeight, hMemDCBW, 0, 0, SRCCOPY);
+                    BitBlt(hdc, curX, curY, bmpBW.bmWidth, bmpBW.bmHeight, hMemDCBW, 0, 0, SRCCOPY);
                     curX += bmpBW.bmWidth;
                     SelectObject(hMemDCBW, hOldBmpBW);
                     DeleteDC(hMemDCBW);
@@ -635,10 +859,50 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     HBITMAP hOldBmpBW = (HBITMAP)SelectObject(hMemDCBW, hBitmapBW_SSE);
                     BITMAP bmpBW;
                     GetObject(hBitmapBW_SSE, sizeof(BITMAP), &bmpBW);
-                    BitBlt(hdc, curX, yOffset, bmpBW.bmWidth, bmpBW.bmHeight, hMemDCBW, 0, 0, SRCCOPY);
+                    BitBlt(hdc, curX, curY, bmpBW.bmWidth, bmpBW.bmHeight, hMemDCBW, 0, 0, SRCCOPY);
                     curX += bmpBW.bmWidth;
                     SelectObject(hMemDCBW, hOldBmpBW);
                     DeleteDC(hMemDCBW);
+                }
+                if (hBitmapSharpenC) {
+                    HDC hMemDCSharpen = CreateCompatibleDC(hdc);
+                    HBITMAP hOldBmpSharpen = (HBITMAP)SelectObject(hMemDCSharpen, hBitmapSharpenC);
+                    BITMAP bmpSharpen;
+                    GetObject(hBitmapSharpenC, sizeof(BITMAP), &bmpSharpen);
+                    BitBlt(hdc, curX, curY, bmpSharpen.bmWidth, bmpSharpen.bmHeight, hMemDCSharpen, 0, 0, SRCCOPY);
+                    curX += bmpSharpen.bmWidth;
+                    SelectObject(hMemDCSharpen, hOldBmpSharpen);
+                    DeleteDC(hMemDCSharpen);
+                }
+                if (hBitmapSharpenMMX) {
+                    HDC hMemDCSharpen = CreateCompatibleDC(hdc);
+                    HBITMAP hOldBmpSharpen = (HBITMAP)SelectObject(hMemDCSharpen, hBitmapSharpenMMX);
+                    BITMAP bmpSharpen;
+                    GetObject(hBitmapSharpenMMX, sizeof(BITMAP), &bmpSharpen);
+                    BitBlt(hdc, curX, curY, bmpSharpen.bmWidth, bmpSharpen.bmHeight, hMemDCSharpen, 0, 0, SRCCOPY);
+                    curX += bmpSharpen.bmWidth;
+                    SelectObject(hMemDCSharpen, hOldBmpSharpen);
+                    DeleteDC(hMemDCSharpen);
+                }
+                if (hBitmapSharpenSSE) {
+                    HDC hMemDCSharpen = CreateCompatibleDC(hdc);
+                    HBITMAP hOldBmpSharpen = (HBITMAP)SelectObject(hMemDCSharpen, hBitmapSharpenSSE);
+                    BITMAP bmpSharpen;
+                    GetObject(hBitmapSharpenSSE, sizeof(BITMAP), &bmpSharpen);
+                    BitBlt(hdc, curX, curY, bmpSharpen.bmWidth, bmpSharpen.bmHeight, hMemDCSharpen, 0, 0, SRCCOPY);
+                    curX += bmpSharpen.bmWidth;
+                    SelectObject(hMemDCSharpen, hOldBmpSharpen);
+                    DeleteDC(hMemDCSharpen);
+                }
+
+                // 시간 문자열 출력: 변환/샤픈 이미지가 하나라도 있으면 항상 출력
+                if (g_bwTimeStr[0] &&
+                    (hBitmapBW || hBitmapBW_MMX || hBitmapBW_SSE ||
+                     hBitmapSharpenC || hBitmapSharpenMMX || hBitmapSharpenSSE)) {
+                    int textY = yOffset + bmp.bmHeight + 10;
+                    SetBkMode(hdc, TRANSPARENT);
+                    SetTextColor(hdc, RGB(0,0,0));
+                    TextOutW(hdc, xOffset + 10, textY, g_bwTimeStr, (int)wcslen(g_bwTimeStr));
                 }
             }
             EndPaint(hWnd, &ps);
