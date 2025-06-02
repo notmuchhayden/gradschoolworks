@@ -4,13 +4,13 @@
 ;=======================================================================
 
 .data
-    maskB   dq 000000FF000000FFh
-    maskG   dq 0000FF000000FF00h
-    maskR   dq 00FF000000FF0000h
+    maskR   dq 0000000FF000000FFh
+    maskG   dq 00000FF000000FF00h
+    maskB   dq 000FF000000FF0000h
     maskA   dq 0FF000000FF000000h ; 여기서 맨 앞에 0을 추가!
-    weightB dq 001D001D001D001Dh  ; 29
-    weightG dq 0096009600960096h  ; 150
-    weightR dq 004C004C004C004Ch  ; 76
+    weightR dq 0004C004C004C004Ch  ; 76
+    weightG dq 00096009600960096h  ; 150
+    weightB dq 0001D001D001D001Dh  ; 29
 
 .code
 ConvertRGBAToBW_MMX_ PROC
@@ -34,10 +34,11 @@ col_loop:
 
     movq    mm0, qword ptr [rcx + rax]    ; mm0 = 2픽셀(RGBA RGBA)
 
-    ; B 추출 및 가중치 곱
+    ; R 추출 및 가중치 곱
     movq    mm1, mm0
-    pand    mm1, [maskB]
-    pmullw  mm1, [weightB]
+    pand    mm1, [maskR]
+    pmullw  mm1, [weightR]
+    
 
     ; G 추출 및 가중치 곱
     movq    mm2, mm0
@@ -45,18 +46,18 @@ col_loop:
     psrlw   mm2, 8
     pmullw  mm2, [weightG]
 
-    ; R 추출 및 가중치 곱
+    ; B 추출 및 가중치 곱
     movq    mm3, mm0
-    pand    mm3, [maskR]
-    psrlw   mm3, 16
-    pmullw  mm3, [weightR]
+    pand    mm3, [maskB]
+    psrld   mm3, 16
+    pmullw  mm3, [weightB]
 
     ; B+G+R 합산
-    paddw   mm1, mm2
-    paddw   mm1, mm3
+    paddd   mm1, mm2
+    paddd   mm1, mm3
 
     ; 8비트로 정규화 (>>8)
-    psrlw   mm1, 8
+    psrld   mm1, 8
 
     ; A 채널 추출
     movq    mm2, mm0
@@ -67,7 +68,7 @@ col_loop:
     psllw   mm3, 8
     por     mm1, mm3
     movq    mm3, mm1
-    psllw   mm3, 8
+    pslld   mm3, 8
     por     mm1, mm3
 
     ; A와 합치기
