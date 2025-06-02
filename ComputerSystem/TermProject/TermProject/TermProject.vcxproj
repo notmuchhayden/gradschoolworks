@@ -107,7 +107,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AddModuleNamesToAssembly>ImageProcessMMX.asm;ImageProcessSSE.asm;%(AddModuleNamesToAssembly)</AddModuleNamesToAssembly>
+      <AddModuleNamesToAssembly>ConvertBW_MMX.asm;ConvertBW_SSE.asm;%(AddModuleNamesToAssembly)</AddModuleNamesToAssembly>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -126,13 +126,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
-    <ClInclude Include="ImageProcess.h" />
+    <ClInclude Include="ImageProcesses.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TermProject.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ImageProcessC.cpp" />
+    <ClCompile Include="ConvertBW_C.cpp" />
     <ClCompile Include="TermProject.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -143,11 +143,11 @@
     <Image Include="TermProject.ico" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="ImageProcessMMX.asm">
+    <MASM Include="ConvertBW_MMX.asm">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </MASM>
-    <MASM Include="ImageProcessSSE.asm">
+    <MASM Include="ConvertBW_SSE.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </MASM>
   </ItemGroup>

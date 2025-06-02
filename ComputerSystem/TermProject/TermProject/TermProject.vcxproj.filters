@@ -27,7 +27,7 @@
     <ClInclude Include="TermProject.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ImageProcess.h">
+    <ClInclude Include="ImageProcesses.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClCompile Include="TermProject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ImageProcessC.cpp">
+    <ClCompile Include="ConvertBW_C.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +53,10 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="ImageProcessMMX.asm">
+    <MASM Include="ConvertBW_MMX.asm">
       <Filter>소스 파일</Filter>
     </MASM>
-    <MASM Include="ImageProcessSSE.asm">
+    <MASM Include="ConvertBW_SSE.asm">
       <Filter>소스 파일</Filter>
     </MASM>
   </ItemGroup>

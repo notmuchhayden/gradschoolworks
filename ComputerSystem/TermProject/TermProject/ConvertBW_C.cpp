@@ -1,22 +1,4 @@
-#include "ImageProcess.h"
-
-// Convert RGB image to grayscale (black and white)
-void ConvertRGBToBW(unsigned char* bufIn, unsigned char* bufOut, int nWidth, int nHeight)
-{
-	int j = 0, i = 0, nValue = 0;
-	int nWidth3 = nWidth * 3;
-	for (j = 0; j < nHeight; j++) {
-		for (i = 0; i < nWidth3; i += 3) {
-			nValue =	bufIn[i + j * nWidth3 + 0] * 0.299f + 
-						bufIn[i + j * nWidth3 + 1] * 0.587f + 
-						bufIn[i + j * nWidth3 + 2] * 0.114f;
-
-			bufOut[i + j * nWidth3 + 0] = nValue;
-			bufOut[i + j * nWidth3 + 1] = nValue;
-			bufOut[i + j * nWidth3 + 2] = nValue;
-		}
-	}
-}
+#include "ImageProcesses.h"
 
 // Convert an RGBA image to a black and white image
 void ConvertRGBAToBW(unsigned char* bufIn, unsigned char* bufOut, int nWidth, int nHeight)

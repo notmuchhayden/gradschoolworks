@@ -3,7 +3,7 @@
 
 #include "framework.h"
 #include "TermProject.h"
-#include "ImageProcess.h" // 상단에 추가
+#include "ImageProcesses.h" // 상단에 추가
 #include <commdlg.h> // 파일 열기 대화상자 사용
 #include <algorithm>
 #include <chrono> // 상단에 추가
