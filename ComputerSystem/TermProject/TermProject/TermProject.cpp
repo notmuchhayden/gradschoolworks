@@ -132,7 +132,7 @@ HBITMAP ConvertColorToBW_MMX(HBITMAP hSrcBmp) {
     // 시간 측정 및 1000번 반복
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 1000; ++i) {
-        ConvertRGBAToBW_MMX_(bufIn, bufOut, width, height); // RGBA용 함수여야 함
+        ConvertRGBAToBW_SSE_(bufIn, bufOut, width, height); // RGBA용 함수여야 함
     }
     auto end = std::chrono::high_resolution_clock::now();
     double elapsed = std::chrono::duration<double, std::milli>(end - start).count();
