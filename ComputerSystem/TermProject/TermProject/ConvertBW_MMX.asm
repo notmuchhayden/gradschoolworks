@@ -17,6 +17,8 @@ ConvertRGBAToBW_MMX_ PROC
     push    rbx
     push    rsi
     push    rdi
+    push    r12
+    push    r13
 
     mov     r10d, r8d            ; nWidth
     imul    r10d, 4              ; nWidth4 = nWidth * 4
@@ -39,7 +41,6 @@ WidthLoop:
     pand    mm1, [maskR]
     pmullw  mm1, [weightR]
     
-
     ; G 추출 및 가중치 곱
     movq    mm2, mm0
     pand    mm2, [maskG]
@@ -86,6 +87,8 @@ WidthLoop:
     jl      HeightLoop
 
     emms
+    pop     r13
+    pop     r12
     pop     rdi
     pop     rsi
     pop     rbx
