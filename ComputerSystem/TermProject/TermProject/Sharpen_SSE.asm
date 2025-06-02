@@ -1,18 +1,8 @@
-;=======================================================================
-; extern "C" void Sharpen_SSE(unsigned char* bufIn, unsigned char* bufOut, int nWidth, int nHeight);
-;=======================================================================
-
-; 16비트 short 8개짜리 9 상수 벡터
 .data
-    NineVec dq 0009000900090009h, 0009000900090009h
+    NineVec dq 0009000900090009h, 0009000900090009h ; 16바이트(128비트)로 선언
 
 .code
 Sharpen_SSE_ PROC
-    ; rcx: bufIn
-    ; rdx: bufOut
-    ; r8d: nWidth
-    ; r9d: nHeight
-
     push    rsi
     push    rdi
     push    rbx
@@ -21,77 +11,69 @@ Sharpen_SSE_ PROC
     push    r14
     push    r15
 
-    mov     rsi, rcx            ; rsi = bufIn
-    mov     rdi, rdx            ; rdi = bufOut
+    mov     rsi, rcx
+    mov     rdi, rdx
     mov     r12d, r8d
-    imul    r12d, 4             ; r12d = nImageWidth4
-    mov     r13d, r9d           ; r13d = nHeight
+    imul    r12d, 4
+    mov     r13d, r9d
 
-    mov     r14d, 1             ; j = 1
-row_loop:
+    mov     r14d, 1
+HeightLoop:
     cmp     r14d, r13d
-    jge     end_func            ; if (j >= nHeight - 1) break
+    jge     end_func
 
-    mov     r15d, 4             ; i = 4
-col_loop:
+    mov     r15d, 4
+WidthLoop:
     mov     eax, r12d
-    sub     eax, 16
+    sub     eax, 8
     cmp     r15d, eax
-    jg      next_row            ; if (i > nImageWidth4 - 16) break
+    jg      next_row
 
-    ; center = i + j * nImageWidth4
     mov     eax, r14d
     imul    eax, r12d
-    add     eax, r15d           ; eax = center offset
+    add     eax, r15d
 
-    ; SSE로 4픽셀(16바이트)씩 처리
-    ; 9개 이웃 픽셀을 각각 xmm 레지스터에 로드
+    ; 9개 이웃 픽셀 8바이트씩 로드
     mov     ebx, eax
     sub     ebx, r12d
     sub     ebx, 4
-    movdqu  xmm0, [rsi + rbx]   ; top left
+    movq    xmm0, qword ptr [rsi + rbx]
 
     mov     ebx, eax
     sub     ebx, r12d
-    movdqu  xmm1, [rsi + rbx]   ; top
+    movq    xmm1, qword ptr [rsi + rbx]
 
     mov     ebx, eax
     sub     ebx, r12d
     add     ebx, 4
-    movdqu  xmm2, [rsi + rbx]   ; top right
+    movq    xmm2, qword ptr [rsi + rbx]
 
     mov     ebx, eax
     sub     ebx, 4
-    movdqu  xmm3, [rsi + rbx]   ; left
+    movq    xmm3, qword ptr [rsi + rbx]
 
-    movdqu  xmm4, [rsi + rax]   ; center
+    movq    xmm4, qword ptr [rsi + rax]
 
     mov     ebx, eax
     add     ebx, 4
-    movdqu  xmm5, [rsi + rbx]   ; right
+    movq    xmm5, qword ptr [rsi + rbx]
 
     mov     ebx, eax
     add     ebx, r12d
     sub     ebx, 4
-    movdqu  xmm6, [rsi + rbx]   ; bottom left
+    movq    xmm6, qword ptr [rsi + rbx]
 
     mov     ebx, eax
     add     ebx, r12d
-    movdqu  xmm7, [rsi + rbx]   ; bottom
+    movq    xmm7, qword ptr [rsi + rbx]
 
     mov     ebx, eax
     add     ebx, r12d
     add     ebx, 4
-    movdqu  xmm8, [rsi + rbx]   ; bottom right
+    movq    xmm8, qword ptr [rsi + rbx]
 
-    ; unsigned char -> unsigned short 변환 (zero-extend)
+    ; zero-extend
     pxor    xmm9, xmm9
-    movdqa  xmm10, xmm0
-    movdqa  xmm11, xmm1
-    movdqa  xmm12, xmm2
-    movdqa  xmm13, xmm3
-    movdqa  xmm14, xmm4
-    movdqa  xmm15, xmm5
 
     punpcklbw xmm0, xmm9
     punpcklbw xmm1, xmm9
@@ -103,11 +85,10 @@ col_loop:
     punpcklbw xmm7, xmm9
     punpcklbw xmm8, xmm9
 
-    ; 샤프닝 커널 적용: -1, -1, -1, -1, 9, -1, -1, -1, -1
-    ; total = 9*center - (topL+top+topR+left+right+botL+bot+botR)
-    movdqa  xmm10, xmm4         ; xmm10 = center
-    movdqa  xmm12, oword ptr [NineVec] ; NineVec를 xmm12에 로드
-    pmullw  xmm10, xmm12               ; 9*center
+    ; 샤프닝 커널 적용
+    movdqa  xmm10, xmm4
+    movdqa  xmm12, oword ptr [NineVec]
+    pmullw  xmm10, xmm12
 
     movdqa  xmm11, xmm0
     paddw   xmm11, xmm1
@@ -116,22 +97,22 @@ col_loop:
     paddw   xmm11, xmm5
     paddw   xmm11, xmm6
     paddw   xmm11, xmm7
-    paddw   xmm11, xmm8         ; sum of 8 neighbors
+    paddw   xmm11, xmm8
 
-    psubw   xmm10, xmm11        ; total = 9*center - sum(neighbors)
+    psubw   xmm10, xmm11
 
     ; 0~255로 클램핑
     packuswb xmm10, xmm9
 
-    ; 결과 저장
-    movdqu  [rdi + rax], xmm10
+    ; 결과 저장 (2픽셀, 8바이트)
+    movq    qword ptr [rdi + rax], xmm10
 
-    add     r15d, 16            ; 4픽셀(16바이트)씩 이동
-    jmp     col_loop
+    add     r15d, 8
+    jmp     WidthLoop
 
 next_row:
     inc     r14d
-    jmp     row_loop
+    jmp     HeightLoop
 
 end_func:
     pop     r15
