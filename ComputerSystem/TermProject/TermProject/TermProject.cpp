@@ -630,7 +630,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             GetClientRect(hWnd, &rc);
 
                             // 버튼 위치 계산 (가로로)
-                            int btnY = imgHeight + 40 - yScrollPos;
+                            int btnY = imgHeight * 3 + 40 - yScrollPos; // 3줄 기준
                             SetWindowPos(hBtnBW, NULL, 10, btnY, 100, 30, SWP_SHOWWINDOW);
                             SetWindowPos(hBtnBW_MMX, NULL, 120, btnY, 120, 30, SWP_SHOWWINDOW);
                             SetWindowPos(hBtnBW_SSE, NULL, 250, btnY, 120, 30, SWP_SHOWWINDOW);
@@ -644,9 +644,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             ShowWindow(hBtnSharpenMMX, SW_SHOW);
                             ShowWindow(hBtnSharpenSSE, SW_SHOW);
 
-                            // 스크롤바 설정 (가로: 원본+변환*3, 세로: 이미지+버튼)
-                            int totalWidth = imgWidth * (1 + (hBitmapBW ? 1 : 0) + (hBitmapBW_MMX ? 1 : 0) + (hBitmapBW_SSE ? 1 : 0) + (hBitmapSharpenC ? 1 : 0) + (hBitmapSharpenMMX ? 1 : 0) + (hBitmapSharpenSSE ? 1 : 0));
-                            int totalHeight = imgHeight + 10 + 30;
+                            // 스크롤바 설정 (가로: 각 줄의 최대 이미지 합, 세로: 3줄)
+                            int maxBW = 0, maxSharpen = 0;
+                            if (hBitmapBW) maxBW++;
+                            if (hBitmapBW_MMX) maxBW++;
+                            if (hBitmapBW_SSE) maxBW++;
+                            if (hBitmapSharpenC) maxSharpen++;
+                            if (hBitmapSharpenMMX) maxSharpen++;
+                            if (hBitmapSharpenSSE) maxSharpen++;
+                            int maxRowImages = max(1, maxBW, maxSharpen);
+                            int totalWidth = imgWidth * maxRowImages;
+                            int totalHeight = imgHeight * 3 + 2 * 10 + 30; // 3줄 + 2*rowSpacing + 버튼
+
                             SCROLLINFO si = { sizeof(SCROLLINFO), SIF_RANGE | SIF_PAGE };
                             si.nMin = 0;
                             si.nMax = max(totalWidth, rc.right - rc.left) - 1;
@@ -714,9 +723,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             RECT rc;
             GetClientRect(hWnd, &rc);
-            int nImages = 1 + (hBitmapBW ? 1 : 0) + (hBitmapBW_MMX ? 1 : 0) + (hBitmapBW_SSE ? 1 : 0) + (hBitmapSharpenC ? 1 : 0) + (hBitmapSharpenMMX ? 1 : 0) + (hBitmapSharpenSSE ? 1 : 0);
-            int totalWidth = imgWidth * nImages;
-            int totalHeight = imgHeight + 10 + 30;
+
+            int maxBW = 0, maxSharpen = 0;
+            if (hBitmapBW) maxBW++;
+            if (hBitmapBW_MMX) maxBW++;
+            if (hBitmapBW_SSE) maxBW++;
+            if (hBitmapSharpenC) maxSharpen++;
+            if (hBitmapSharpenMMX) maxSharpen++;
+            if (hBitmapSharpenSSE) maxSharpen++;
+            int maxRowImages = max(1, maxBW, maxSharpen);
+            int totalWidth = imgWidth * maxRowImages;
+            int totalHeight = imgHeight * 3 + 2 * 10 + 30; // 3줄 + 2*rowSpacing + 버튼
+
             SCROLLINFO si = { sizeof(SCROLLINFO), SIF_RANGE | SIF_PAGE };
             si.nMin = 0;
             si.nMax = max(totalWidth, rc.right - rc.left) - 1;
@@ -727,8 +745,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             si.nPage = rc.bottom - rc.top;
             SetScrollInfo(hWnd, SB_VERT, &si, TRUE);
             yMaxScroll = max(0, totalHeight - (rc.bottom - rc.top));
-            // 버튼 위치 조정 (가로로)
-            int btnY = imgHeight + 40 - yScrollPos;
+
+            // 버튼 위치 조정 (3줄 기준)
+            int btnY = imgHeight * 3 + 40 - yScrollPos;
             SetWindowPos(hBtnBW, NULL, 10, btnY, 100, 30, SWP_NOZORDER);
             SetWindowPos(hBtnBW_MMX, NULL, 120, btnY, 120, 30, SWP_NOZORDER);
             SetWindowPos(hBtnBW_SSE, NULL, 250, btnY, 120, 30, SWP_NOZORDER);
@@ -820,20 +839,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             HDC hdc = BeginPaint(hWnd, &ps);
             int yOffset = -yScrollPos;
             int xOffset = -xScrollPos;
-            int curX = xOffset;
-            int curY = yOffset;
 
+            int curX, curY;
+            int rowSpacing = 10;
+
+            // 1. 첫 줄: 원본
+            curX = xOffset;
+            curY = yOffset;
             if (hBitmap) {
-                // 1. 첫 줄: 원본 및 흑백/샤픈 이미지 가로 나열
                 HDC hMemDC = CreateCompatibleDC(hdc);
                 HBITMAP hOldBmp = (HBITMAP)SelectObject(hMemDC, hBitmap);
                 BITMAP bmp;
                 GetObject(hBitmap, sizeof(BITMAP), &bmp);
                 BitBlt(hdc, curX, curY, bmp.bmWidth, bmp.bmHeight, hMemDC, 0, 0, SRCCOPY);
-                curX += bmp.bmWidth;
                 SelectObject(hMemDC, hOldBmp);
                 DeleteDC(hMemDC);
 
+                // 2. 두 번째 줄: 흑백 변환(C, MMX, SSE)
+                curX = xOffset;
+                curY = yOffset + bmp.bmHeight + rowSpacing;
                 if (hBitmapBW) {
                     HDC hMemDCBW = CreateCompatibleDC(hdc);
                     HBITMAP hOldBmpBW = (HBITMAP)SelectObject(hMemDCBW, hBitmapBW);
@@ -864,6 +888,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     SelectObject(hMemDCBW, hOldBmpBW);
                     DeleteDC(hMemDCBW);
                 }
+
+                // 3. 세 번째 줄: Sharpen(C, MMX, SSE)
+                curX = xOffset;
+                curY = yOffset + bmp.bmHeight * 2 + rowSpacing * 2;
                 if (hBitmapSharpenC) {
                     HDC hMemDCSharpen = CreateCompatibleDC(hdc);
                     HBITMAP hOldBmpSharpen = (HBITMAP)SelectObject(hMemDCSharpen, hBitmapSharpenC);
@@ -895,11 +923,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     DeleteDC(hMemDCSharpen);
                 }
 
-                // 시간 문자열 출력: 변환/샤픈 이미지가 하나라도 있으면 항상 출력
+                // 시간 문자열 출력 (원본 아래에)
                 if (g_bwTimeStr[0] &&
                     (hBitmapBW || hBitmapBW_MMX || hBitmapBW_SSE ||
                      hBitmapSharpenC || hBitmapSharpenMMX || hBitmapSharpenSSE)) {
-                    int textY = yOffset + bmp.bmHeight + 10;
+                    int textY = yOffset + bmp.bmHeight + rowSpacing / 2;
                     SetBkMode(hdc, TRANSPARENT);
                     SetTextColor(hdc, RGB(0,0,0));
                     TextOutW(hdc, xOffset + 10, textY, g_bwTimeStr, (int)wcslen(g_bwTimeStr));
