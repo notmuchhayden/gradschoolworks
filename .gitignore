@@ -11,3 +11,5 @@
 /ComputerSystem/TermProject/x64/Release
 /MachineLearning/TermProject/data
 /MachineLearning/TermProject/__pycache__
+*.pth
+
