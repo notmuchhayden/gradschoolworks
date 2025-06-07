@@ -24,9 +24,10 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         if not self.equalInOut:
             x = self.relu(self.bn1(x))
+            out = x  # <== 반드시 out을 정의해야 함
         else:
             out = self.relu(self.bn1(x))
-        out = self.conv1(out if self.equalInOut else x)
+        out = self.conv1(out)
         out = self.relu2(self.bn2(out))
         if self.droprate > 0:
             out = F.dropout(out, p=self.droprate, training=self.training)
@@ -91,7 +92,7 @@ class WideResNet(nn.Module):
 
 # Training & Evaluation
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-net = WideResNet().to(device)
+net = WideResNet(depth=16, widen_factor=2).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
 scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[60, 120, 160], gamma=0.2)
