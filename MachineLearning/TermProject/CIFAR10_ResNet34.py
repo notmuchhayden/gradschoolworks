@@ -42,29 +42,30 @@ class BasicBlock(nn.Module):
         return out
 
 
-# 경량화된 ResNet(ResNet-18 스타일) 정의
-class CIFAR10_ResNet(nn.Module):
-    def __init__(self, block=BasicBlock, num_blocks=[2, 2, 2, 2], num_classes=10):
-        super(CIFAR10_ResNet, self).__init__()
-        self.in_planes = 32
+# 경량화된 ResNet 정의
+# ResNet-34 스타일 블록 수로 변경
+class CIFAR10_ResNet34(nn.Module):
+    def __init__(self, block=BasicBlock, num_blocks=[3, 4, 6, 3], num_classes=10):
+        super(CIFAR10_ResNet34, self).__init__()
+        self.in_planes = 64
 
         # 입력 계층: 입력 채널 3(RGB), 출력 채널 32, 커널 크기 3x3, 패딩 1
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         # 첫 번째 배치 정규화 계층
-        self.bn1 = nn.BatchNorm2d(32)
+        self.bn1 = nn.BatchNorm2d(64)
         # ReLU 활성화 함수
         self.relu = nn.ReLU(inplace=True)
 
         # 4개의 잔차 블록 스택 (채널 수 증가, 다운샘플링 포함)
-        self.layer1 = self._make_layer(block, 32, num_blocks[0], stride=1)
-        self.layer2 = self._make_layer(block, 64, num_blocks[1], stride=2)
-        self.layer3 = self._make_layer(block, 128, num_blocks[2], stride=2)
-        self.layer4 = self._make_layer(block, 256, num_blocks[3], stride=2)
+        self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
+        self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
+        self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
+        self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
 
         # Global Average Pooling 및 FC 계층
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         # 최종 출력 클래스 수에 맞춘 완전연결 계층
-        self.fc = nn.Linear(256 * block.expansion, num_classes)
+        self.fc = nn.Linear(512 * block.expansion, num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         # 잔차 블록을 쌓는 함수
@@ -94,12 +95,28 @@ class CIFAR10_ResNet(nn.Module):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"현재 선택된 장치: {device}")
 
-net = CIFAR10_ResNet().to(device)
+# ResNet-34로 모델 생성
+net = CIFAR10_ResNet34().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
+# 이어서 학습을 위한 checkpoint 불러오기
+checkpoint_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_resnet34.pth')
+start_epoch = 0
+if os.path.exists(checkpoint_path):
+    checkpoint = torch.load(checkpoint_path)
+    if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+        net.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        start_epoch = checkpoint.get('epoch', 0) + 1
+        print(f"Checkpoint loaded. Resume from epoch {start_epoch}")
+    else:
+        net.load_state_dict(checkpoint)
+        print("Model weights loaded. Training will start from epoch 0.")
+
 # 학습 루프
-for epoch in range(20):  # 에폭 수는 조정 가능
+num_epochs = 5  # 에폭 수는 조정 가능
+for epoch in range(start_epoch, num_epochs):
     net.train()
     running_loss = 0.0
     for inputs, labels in trainloader:
@@ -111,6 +128,12 @@ for epoch in range(20):  # 에폭 수는 조정 가능
         optimizer.step()
         running_loss += loss.item()
     print(f"Epoch {epoch + 1}, Loss: {running_loss / len(trainloader):.4f}")
+    # 매 epoch마다 checkpoint 저장
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': net.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+    }, checkpoint_path)
 
 # 테스트 정확도 평가
 net.eval()
@@ -127,6 +150,6 @@ with torch.no_grad():
 print(f'Test Accuracy: {100 * correct / total:.2f}%')
 
 # 모델 저장
-save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_small_resnet.pth')
+save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_resnet34.pth')
 torch.save(net.state_dict(), save_path)
 print(f"모델이 {save_path} 파일로 저장되었습니다.")

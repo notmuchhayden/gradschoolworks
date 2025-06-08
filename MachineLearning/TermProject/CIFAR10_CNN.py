@@ -6,9 +6,9 @@ from CIFAR10Loader import trainloader, testloader
 import os
 
 
-class CIFAR10_CNN_Light(nn.Module):
+class CIFAR10_CNN(nn.Module):
     def __init__(self):
-        super(CIFAR10_CNN_Light, self).__init__()
+        super(CIFAR10_CNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
@@ -30,12 +30,27 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"현재 선택된 장치: {device}")
 
 # 모델, 손실 함수, 옵티마이저 정의
-net = CIFAR10_CNN_Light().to(device)
+net = CIFAR10_CNN().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
+# 이어서 학습을 위한 checkpoint 불러오기
+checkpoint_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_cnn.pth')
+start_epoch = 0
+if os.path.exists(checkpoint_path):
+    checkpoint = torch.load(checkpoint_path)
+    if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+        net.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        start_epoch = checkpoint.get('epoch', 0) + 1
+        print(f"Checkpoint loaded. Resume from epoch {start_epoch}")
+    else:
+        net.load_state_dict(checkpoint)
+        print("Model weights loaded. Training will start from epoch 0.")
+
 # 학습 루프
-for epoch in range(20):
+num_epochs = 5
+for epoch in range(start_epoch, num_epochs):
     net.train()
     running_loss = 0.0
     for inputs, labels in trainloader:
@@ -47,6 +62,12 @@ for epoch in range(20):
         optimizer.step()
         running_loss += loss.item()
     print(f"Epoch {epoch+1}, Loss: {running_loss / len(trainloader):.4f}")
+    # 매 epoch마다 checkpoint 저장
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': net.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+    }, checkpoint_path)
 
 # 정확도 측정
 net.eval()
@@ -63,6 +84,6 @@ with torch.no_grad():
 print(f'Test Accuracy: {100 * correct / total:.2f}%')
 
 # 모델 저장
-save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_cnn_light.pth')
+save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_cnn.pth')
 torch.save(net.state_dict(), save_path)
 print(f"모델이 {save_path} 파일로 저장되었습니다.")

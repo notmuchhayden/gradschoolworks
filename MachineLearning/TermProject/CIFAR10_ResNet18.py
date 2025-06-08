@@ -43,9 +43,9 @@ class BasicBlock(nn.Module):
 
 
 # 경량화된 ResNet(ResNet-18 스타일) 정의
-class CIFAR10_ResNet(nn.Module):
+class CIFAR10_ResNet18(nn.Module):
     def __init__(self, block=BasicBlock, num_blocks=[2, 2, 2, 2], num_classes=10):
-        super(CIFAR10_ResNet, self).__init__()
+        super(CIFAR10_ResNet18, self).__init__()
         self.in_planes = 32
 
         # 입력 계층: 입력 채널 3(RGB), 출력 채널 32, 커널 크기 3x3, 패딩 1
@@ -94,12 +94,12 @@ class CIFAR10_ResNet(nn.Module):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"현재 선택된 장치: {device}")
 
-net = CIFAR10_ResNet().to(device)
+net = CIFAR10_ResNet18().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # 이어서 학습을 위한 checkpoint 불러오기
-checkpoint_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_small_resnet.pth')
+checkpoint_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_resnet18.pth')
 start_epoch = 0
 if os.path.exists(checkpoint_path):
     checkpoint = torch.load(checkpoint_path)
@@ -113,7 +113,7 @@ if os.path.exists(checkpoint_path):
         print("Model weights loaded. Training will start from epoch 0.")
 
 # 학습 루프
-num_epochs = 20  # 에폭 수는 조정 가능
+num_epochs = 5  # 에폭 수는 조정 가능
 for epoch in range(start_epoch, num_epochs):
     net.train()
     running_loss = 0.0
@@ -148,6 +148,6 @@ with torch.no_grad():
 print(f'Test Accuracy: {100 * correct / total:.2f}%')
 
 # 모델 저장
-save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_small_resnet.pth')
+save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cifar10_resnet18.pth')
 torch.save(net.state_dict(), save_path)
 print(f"모델이 {save_path} 파일로 저장되었습니다.")
