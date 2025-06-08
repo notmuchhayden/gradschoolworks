@@ -5,23 +5,26 @@ import torch.optim as optim
 from CIFAR10Loader import trainloader, testloader
 import os
 
-
+# LeNet-5 스타일의 CNN 모델 정의
 class CIFAR10_CNN(nn.Module):
     def __init__(self):
         super(CIFAR10_CNN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.dropout = nn.Dropout(0.3)  # Dropout 추가
-        self.fc1 = nn.Linear(32 * 8 * 8, 128)
-        self.fc2 = nn.Linear(128, 10)
+        # LeNet-5 스타일의 기본 CNN 구조
+        self.conv1 = nn.Conv2d(3, 6, kernel_size=5, stride=1, padding=2)  # 32x32x3 -> 32x32x6
+        self.pool = nn.AvgPool2d(2, 2)  # 평균 풀링
+        self.conv2 = nn.Conv2d(6, 16, kernel_size=5, stride=1)  # 16x16x6 -> 12x12x16
+        # FC 계층
+        self.fc1 = nn.Linear(16 * 6 * 6, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))  # 32x32 → 16x16
-        x = self.pool(F.relu(self.conv2(x)))  # 16x16 → 8x8
-        x = x.view(-1, 32 * 8 * 8)
-        x = self.dropout(F.relu(self.fc1(x)))
-        x = self.fc2(x)
+        x = torch.tanh(self.pool(self.conv1(x)))  # 32x32x3 -> 32x32x6 -> 16x16x6
+        x = torch.tanh(self.pool(self.conv2(x)))  # 16x16x6 -> 12x12x16 -> 6x6x16
+        x = x.view(x.size(0), -1)  # 자동 flatten
+        x = torch.tanh(self.fc1(x))
+        x = torch.tanh(self.fc2(x))
+        x = self.fc3(x)
         return x
 
 
