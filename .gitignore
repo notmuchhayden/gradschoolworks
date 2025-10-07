@@ -13,3 +13,6 @@
 /MachineLearning/TermProject/__pycache__
 *.pth
 
+/ComputerVision/.vs/ComputerVision
+/ComputerVision/HoughLineDetect/x64
+/ComputerVision/x64
