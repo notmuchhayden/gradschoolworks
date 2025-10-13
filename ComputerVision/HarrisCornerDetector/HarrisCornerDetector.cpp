@@ -1,4 +1,4 @@
-// HarrisCornerDetector.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// HarrisCornerDetector.cpp : 이 파일에는 'main' 함수가 포함되어 있습니다. 프로그램 실행이 여기서 시작하고 끝납니다.
 //
 
 #include <iostream>
@@ -7,43 +7,43 @@
 
 int main()
 {
-    // Load image
+    // 이미지 불러오기
     cv::Mat src = cv::imread("input.png");
     if (src.empty()) {
         std::cerr << "이미지를 불러올 수 없습니다!" << std::endl;
         return -1;
     }
 
-    // Convert to grayscale and to float
+    // 그레이스케일로 변환하고 float으로 변환
     cv::Mat gray;
     cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
     cv::Mat fgray;
     gray.convertTo(fgray, CV_32F, 1.0/255.0);
 
-    // Parameters
-    int blockSize = 3;      // neighborhood size for covariance (used implicitly via Gaussian)
+    // 매개변수
+    int blockSize = 3;      // 공분산을 위한 이웃 크기 (가우시안에 의해 간접적으로 사용됨)
     int aperture = 3;       // Sobel aperture
-    double k = 0.04;        // Harris detector free parameter
-    int gaussianSize = 7;   // smoothing window for structure tensor
+    double k = 0.04;        // Harris detector 자유 매개변수
+    int gaussianSize = 7;   // 구조 텐서를 위한 평활화 윈도우 크기
     double gaussianSigma = 2.0;
 
-    // 1) Compute image gradients Ix, Iy
+    // 1) 영상 기울기 Ix, Iy 계산
     cv::Mat Ix, Iy;
     cv::Sobel(fgray, Ix, CV_32F, 1, 0, aperture);
     cv::Sobel(fgray, Iy, CV_32F, 0, 1, aperture);
 
-    // 2) Compute products of derivatives at every pixel: Ixx, Iyy, Ixy
+    // 2) 모든 픽셀에서 미분 곱 계산: Ixx, Iyy, Ixy
     cv::Mat Ixx = Ix.mul(Ix);
     cv::Mat Iyy = Iy.mul(Iy);
     cv::Mat Ixy = Ix.mul(Iy);
 
-    // 3) Apply Gaussian filter to the products to obtain sums of products (structure tensor components)
+    // 3) 곱의 합을 얻기 위해 가우시안 필터 적용 (구조 텐서 성분)
     cv::Mat Sxx, Syy, Sxy;
     cv::GaussianBlur(Ixx, Sxx, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
     cv::GaussianBlur(Iyy, Syy, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
     cv::GaussianBlur(Ixy, Sxy, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
 
-    // 4) Compute Harris response R = det(M) - k * trace(M)^2 per pixel
+    // 4) 각 픽셀에 대해 Harris 응답 R = det(M) - k * trace(M)^2 계산
     cv::Mat response = cv::Mat::zeros(fgray.size(), CV_32F);
     for (int y = 0; y < fgray.rows; ++y) {
         float* rptr = response.ptr<float>(y);
@@ -60,14 +60,14 @@ int main()
         }
     }
 
-    // 5) Threshold and non-maximum suppression (3x3 neighborhood)
+    // 5) 임계값 및 비최대 억제 (3x3 이웃)
     double minVal, maxVal;
     cv::minMaxLoc(response, &minVal, &maxVal);
-    // threshold relative to maximum response
+    // 최대 응답에 대한 상대 임계값
     float thresh = static_cast<float>(0.01 * maxVal);
 
     cv::Mat corners = cv::Mat::zeros(response.size(), CV_8U);
-    int neighborhood = 1; // radius for NMS (1 -> 3x3)
+    int neighborhood = 1; // NMS를 위한 반경 (1 -> 3x3)
 
     for (int y = neighborhood; y < response.rows - neighborhood; ++y) {
         for (int x = neighborhood; x < response.cols - neighborhood; ++x) {
@@ -84,7 +84,7 @@ int main()
         }
     }
 
-    // 6) Draw corners on result image
+    // 6) 결과 이미지에 코너 그리기
     cv::Mat result = src.clone();
     for (int y = 0; y < corners.rows; ++y) {
         const uchar* crow = corners.ptr<uchar>(y);
@@ -95,7 +95,7 @@ int main()
         }
     }
 
-    // Show intermediate and final results
+    // 중간 및 최종 결과 표시
     cv::imshow("Gray", gray);
     cv::imshow("Harris Response (normalized)", response / static_cast<float>(maxVal));
     cv::imshow("Corners", corners);
