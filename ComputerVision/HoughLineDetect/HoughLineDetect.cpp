@@ -39,8 +39,14 @@ int main()
 
     // rho(ρ) 최대값: 이미지 대각선 길이
     int max_rho = static_cast<int>(std::sqrt(width * width + height * height));
-    int num_rho = 2 * max_rho; // -max_rho ~ +max_rho 범위
-    int num_theta = 180;       // θ: 0 ~ 179도 (1도 간격)
+
+    // --- 변경 가능한 해상도 파라미터 ---
+    double rho_res = 2.0;      // rho 한 bin의 크기 (픽셀)
+    int num_theta = 180;      // theta 분할 수(클수록 각도 해상도 증가). 기존은 180(1도 간격)
+    // ------------------------------------
+
+    int num_rho = static_cast<int>(std::ceil(2.0 * max_rho / rho_res)); // -max_rho..+max_rho 범위를 rho_res 단위로 분할
+    int rho_offset = static_cast<int>(std::ceil(max_rho / rho_res));   // 인덱스 오프셋
 
     // 누산기(accumulator) 배열 생성 및 0으로 초기화
     std::vector<std::vector<int>> accumulator(num_rho, std::vector<int>(num_theta, 0));
@@ -62,10 +68,12 @@ int main()
     for (int y = 0; y < height; ++y) {
         const uchar* row = edges.ptr<uchar>(y);
         for (int x = 0; x < width; ++x) {
-            if (row[x] == 0) continue; // 에지가 아닌 픽셀 스킵
+            if (row[x] == 0) // 에지가 아닌 픽셀 스킵
+                continue; 
+                
             for (int t = 0; t < num_theta; ++t) {
                 double rho = x * cos_t[t] + y * sin_t[t];
-                int r = cvRound(rho) + max_rho; // 인덱스로 변환
+                int r = cvRound(rho / rho_res) + rho_offset; // rho_res 반영
                 if (r >= 0 && r < num_rho) {
                     accumulator[r][t]++;
                 }
@@ -116,7 +124,7 @@ int main()
     for (const auto &p : peaks) {
         int r = p.first;
         int t = p.second;
-        double rho = r - max_rho;
+        double rho = (r - rho_offset) * rho_res; // rho_res 반영하여 rho 복원
         double theta = thetas[t];
         double a = std::cos(theta);
         double b = std::sin(theta);
