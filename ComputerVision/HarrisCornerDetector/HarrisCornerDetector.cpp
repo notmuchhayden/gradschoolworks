@@ -1,4 +1,4 @@
-// HarrisCornerDetector.cpp : ÀÌ ÆÄÀÏ¿¡´Â 'main' ÇÔ¼ö°¡ Æ÷ÇÔµÇ¾î ÀÖ½À´Ï´Ù. ÇÁ·Î±×·¥ ½ÇÇàÀÌ ¿©±â¼­ ½ÃÀÛÇÏ°í ³¡³³´Ï´Ù.
+// HarrisCornerDetector.cpp : ì´ íŒŒì¼ì—ëŠ” 'main' í•¨ìˆ˜ê°€ í¬í•¨ë˜ì–´ ìˆìŠµë‹ˆë‹¤. í”„ë¡œê·¸ë¨ ì‹¤í–‰ì´ ì—¬ê¸°ì„œ ì‹œì‘í•˜ê³  ëë‚©ë‹ˆë‹¤.
 //
 
 #include <iostream>
@@ -7,43 +7,43 @@
 
 int main()
 {
-    // ÀÌ¹ÌÁö ºÒ·¯¿À±â
+    // ì´ë¯¸ì§€ ë¶ˆëŸ¬ì˜¤ê¸°
     cv::Mat src = cv::imread("input.png");
     if (src.empty()) {
-        std::cerr << "ÀÌ¹ÌÁö¸¦ ºÒ·¯¿Ã ¼ö ¾ø½À´Ï´Ù!" << std::endl;
+        std::cerr << "ì´ë¯¸ì§€ë¥¼ ë¶ˆëŸ¬ì˜¬ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!" << std::endl;
         return -1;
     }
 
-    // ±×·¹ÀÌ½ºÄÉÀÏ·Î º¯È¯ÇÏ°í floatÀ¸·Î º¯È¯
+    // ê·¸ë ˆì´ìŠ¤ì¼€ì¼ë¡œ ë³€í™˜í•˜ê³  floatìœ¼ë¡œ ë³€í™˜
     cv::Mat gray;
     cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
     cv::Mat fgray;
     gray.convertTo(fgray, CV_32F, 1.0/255.0);
 
-    // ¸Å°³º¯¼ö
-    int blockSize = 3;      // °øºĞ»êÀ» À§ÇÑ ÀÌ¿ô Å©±â (°¡¿ì½Ã¾È¿¡ ÀÇÇØ °£Á¢ÀûÀ¸·Î »ç¿ëµÊ)
+    // ë§¤ê°œë³€ìˆ˜
+    int blockSize = 3;      // ê³µë¶„ì‚°ì„ ìœ„í•œ ì´ì›ƒ í¬ê¸° (ê°€ìš°ì‹œì•ˆì— ì˜í•´ ê°„ì ‘ì ìœ¼ë¡œ ì‚¬ìš©ë¨)
     int aperture = 3;       // Sobel aperture
-    double k = 0.04;        // Harris detector ÀÚÀ¯ ¸Å°³º¯¼ö
-    int gaussianSize = 7;   // ±¸Á¶ ÅÙ¼­¸¦ À§ÇÑ ÆòÈ°È­ À©µµ¿ì Å©±â
+    double k = 0.04;        // Harris detector ììœ  ë§¤ê°œë³€ìˆ˜
+    int gaussianSize = 7;   // êµ¬ì¡° í…ì„œë¥¼ ìœ„í•œ í‰í™œí™” ìœˆë„ìš° í¬ê¸°
     double gaussianSigma = 2.0;
 
-    // 1) ¿µ»ó ±â¿ï±â Ix, Iy °è»ê
+    // 1) ì˜ìƒ ê¸°ìš¸ê¸° Ix, Iy ê³„ì‚°
     cv::Mat Ix, Iy;
     cv::Sobel(fgray, Ix, CV_32F, 1, 0, aperture);
     cv::Sobel(fgray, Iy, CV_32F, 0, 1, aperture);
 
-    // 2) ¸ğµç ÇÈ¼¿¿¡¼­ ¹ÌºĞ °ö °è»ê: Ixx, Iyy, Ixy
+    // 2) ëª¨ë“  í”½ì…€ì—ì„œ ë¯¸ë¶„ ê³± ê³„ì‚°: Ixx, Iyy, Ixy
     cv::Mat Ixx = Ix.mul(Ix);
     cv::Mat Iyy = Iy.mul(Iy);
     cv::Mat Ixy = Ix.mul(Iy);
 
-    // 3) °öÀÇ ÇÕÀ» ¾ò±â À§ÇØ °¡¿ì½Ã¾È ÇÊÅÍ Àû¿ë (±¸Á¶ ÅÙ¼­ ¼ººĞ)
+    // 3) ê³±ì˜ í•©ì„ ì–»ê¸° ìœ„í•´ ê°€ìš°ì‹œì•ˆ í•„í„° ì ìš© (êµ¬ì¡° í…ì„œ ì„±ë¶„)
     cv::Mat Sxx, Syy, Sxy;
     cv::GaussianBlur(Ixx, Sxx, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
     cv::GaussianBlur(Iyy, Syy, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
     cv::GaussianBlur(Ixy, Sxy, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
 
-    // 4) °¢ ÇÈ¼¿¿¡ ´ëÇØ Harris ÀÀ´ä R = det(M) - k * trace(M)^2 °è»ê
+    // 4) ê° í”½ì…€ì— ëŒ€í•´ Harris ì‘ë‹µ R = det(M) - k * trace(M)^2 ê³„ì‚°
     cv::Mat response = cv::Mat::zeros(fgray.size(), CV_32F);
     for (int y = 0; y < fgray.rows; ++y) {
         float* rptr = response.ptr<float>(y);
@@ -60,14 +60,14 @@ int main()
         }
     }
 
-    // 5) ÀÓ°è°ª ¹× ºñÃÖ´ë ¾ïÁ¦ (3x3 ÀÌ¿ô)
+    // 5) ì„ê³„ê°’ ë° ë¹„ìµœëŒ€ ì–µì œ (3x3 ì´ì›ƒ)
     double minVal, maxVal;
     cv::minMaxLoc(response, &minVal, &maxVal);
-    // ÃÖ´ë ÀÀ´ä¿¡ ´ëÇÑ »ó´ë ÀÓ°è°ª
+    // ìµœëŒ€ ì‘ë‹µì— ëŒ€í•œ ìƒëŒ€ ì„ê³„ê°’
     float thresh = static_cast<float>(0.01 * maxVal);
 
     cv::Mat corners = cv::Mat::zeros(response.size(), CV_8U);
-    int neighborhood = 1; // NMS¸¦ À§ÇÑ ¹İ°æ (1 -> 3x3)
+    int neighborhood = 1; // NMSë¥¼ ìœ„í•œ ë°˜ê²½ (1 -> 3x3)
 
     for (int y = neighborhood; y < response.rows - neighborhood; ++y) {
         for (int x = neighborhood; x < response.cols - neighborhood; ++x) {
@@ -84,7 +84,7 @@ int main()
         }
     }
 
-    // 6) °á°ú ÀÌ¹ÌÁö¿¡ ÄÚ³Ê ±×¸®±â
+    // 6) ê²°ê³¼ ì´ë¯¸ì§€ì— ì½”ë„ˆ ê·¸ë¦¬ê¸°
     cv::Mat result = src.clone();
     for (int y = 0; y < corners.rows; ++y) {
         const uchar* crow = corners.ptr<uchar>(y);
@@ -95,7 +95,7 @@ int main()
         }
     }
 
-    // Áß°£ ¹× ÃÖÁ¾ °á°ú Ç¥½Ã
+    // ì¤‘ê°„ ë° ìµœì¢… ê²°ê³¼ í‘œì‹œ
     cv::imshow("Gray", gray);
     cv::imshow("Harris Response (normalized)", response / static_cast<float>(maxVal));
     cv::imshow("Corners", corners);
