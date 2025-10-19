@@ -12,43 +12,39 @@ int main()
 {
     // 1. 이미지 전처리
     // 이미지 불러오기
-    cv::Mat src = cv::imread("input.png");
+    cv::Mat src = cv::imread("../assets/input.png");
     if (src.empty()) {
         std::cerr << "이미지를 불러올 수 없습니다!" << std::endl;
         return -1;
     }
-
     // 그레이스케일 변환
     cv::Mat gray;
     cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
-
-    // 가우시안 블러 적용 (노이즈 제거)
+    // 노이즈 제거
     cv::Mat blurred;
     cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 1.5);
 
-    // 2. 에지 검출 (Canny 알고리즘)
+    // 2. 에지 검출
     cv::Mat edges;
     cv::Canny(blurred, edges, 50, 150);
     // 결과 확인을 위해 에지 이미지 표시
-    cv::imshow("Edges", edges);
-    cv::waitKey(0);
+    //cv::imshow("Edges", edges);
+    //cv::waitKey(0);
 
-    // 3. Hough 공간(파라미터 공간) 정의
+    // 3. Hough 공간 정의
     const int width = edges.cols;
     const int height = edges.rows;
-
-    // rho(ρ) 최대값: 이미지 대각선 길이
+    // rho 최대값: 이미지 대각선 길이
     int max_rho = static_cast<int>(std::sqrt(width * width + height * height));
 
-    // --- 변경 가능한 해상도 파라미터 ---
-    double rho_res = 2.0;      // rho 한 bin의 크기 (픽셀)
-    int num_theta = 180;      // theta 분할 수(클수록 각도 해상도 증가). 기존은 180(1도 간격)
-    // ------------------------------------
+	// Hough 변환 매개변수 
+	double rho_res = 2.0; // pixel 단위 rho 해상도 (기존은 1.0)
+    int num_theta = 180;  // theta 분할 수(클수록 각도 해상도 증가). 기존은 180(1도 간격)
 
     int num_rho = static_cast<int>(std::ceil(2.0 * max_rho / rho_res)); // -max_rho..+max_rho 범위를 rho_res 단위로 분할
     int rho_offset = static_cast<int>(std::ceil(max_rho / rho_res));   // 인덱스 오프셋
 
-    // 누산기(accumulator) 배열 생성 및 0으로 초기화
+    // vote 누적 배열 생성 및 0으로 초기화
     std::vector<std::vector<int>> accumulator(num_rho, std::vector<int>(num_theta, 0));
 
     // θ 값 미리 계산 (라디안 단위)
@@ -83,41 +79,48 @@ int main()
 
     // 5. 최고값 탐색 및 임계값 결정
     int max_votes = 0;
-    for (int r = 0; r < num_rho; ++r)
-        for (int t = 0; t < num_theta; ++t)
-            if (accumulator[r][t] > max_votes) max_votes = accumulator[r][t];
+    for (int r = 0; r < num_rho; ++r) {
+        for (int t = 0; t < num_theta; ++t) {
+            if (accumulator[r][t] > max_votes) 
+                max_votes = accumulator[r][t];
+        }
+    }
 
-    // 임계값: 데이터에 따라 다르게 설정 (최댓값의 비율 또는 절대값)
+    // 임계값 설정
     int threshold = std::max(50, static_cast<int>(max_votes * 0.5));
 
-    // 6. 피크 탐지 (간단한 비최대 억제)
+    // 6. 피크 탐지
     std::vector<std::pair<int,int>> peaks; // (r, t)
-    int neighborhood_r = 10; // rho 이웃 범위
-    int neighborhood_t = 10; // theta 이웃 범위
+    int nsize_r = 10; // rho 이웃 범위
+    int nsize_t = 10; // theta 이웃 범위
 
     for (int r = 0; r < num_rho; ++r) {
         for (int t = 0; t < num_theta; ++t) {
             int votes = accumulator[r][t];
-            if (votes < threshold) continue;
+            if (votes < threshold) 
+                continue;
 
             bool is_max = true;
-            int r0 = std::max(0, r - neighborhood_r);
-            int r1 = std::min(num_rho - 1, r + neighborhood_r);
-            int t0 = std::max(0, t - neighborhood_t);
-            int t1 = std::min(num_theta - 1, t + neighborhood_t);
+            int r0 = std::max(0, r - nsize_r);
+            int r1 = std::min(num_rho - 1, r + nsize_r);
+            int t0 = std::max(0, t - nsize_t);
+            int t1 = std::min(num_theta - 1, t + nsize_t);
 
             for (int rr = r0; rr <= r1 && is_max; ++rr) {
                 for (int tt = t0; tt <= t1; ++tt) {
-                    if (rr == r && tt == t) continue;
-                    if (accumulator[rr][tt] > votes) { is_max = false; break; }
+                    if (rr == r && tt == t) 
+                        continue;
+                    if (accumulator[rr][tt] > votes) { 
+                        is_max = false; 
+                        break; 
+                    }
                 }
             }
 
-            if (is_max) peaks.emplace_back(r, t);
+            if (is_max) 
+                peaks.emplace_back(r, t);
         }
     }
-
-    std::cout << "Detected peaks: " << peaks.size() << " (threshold=" << threshold << ")" << std::endl;
 
     // 7. 검출된 피크를 이미지 상의 선분으로 변환 및 그리기
     cv::Mat result = src.clone();
@@ -136,7 +139,7 @@ int main()
     }
 
     cv::imshow("Detected Lines", result);
-    cv::imwrite("output.png", result);
+    cv::imwrite("../assets/hough_output.png", result);
     cv::waitKey(0);
 
     return 0;
