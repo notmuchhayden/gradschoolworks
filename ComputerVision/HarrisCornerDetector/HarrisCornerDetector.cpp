@@ -7,8 +7,9 @@
 
 int main()
 {
+	// 1. 이미지 전처리
     // 이미지 불러오기
-    cv::Mat src = cv::imread("input.png");
+    cv::Mat src = cv::imread("../assets/input.png");
     if (src.empty()) {
         std::cerr << "이미지를 불러올 수 없습니다!" << std::endl;
         return -1;
@@ -21,70 +22,77 @@ int main()
     gray.convertTo(fgray, CV_32F, 1.0/255.0);
 
     // 매개변수
-    int blockSize = 3;      // 공분산을 위한 이웃 크기 (가우시안에 의해 간접적으로 사용됨)
+    int block_size = 3;      // 공분산을 위한 이웃 크기 (가우시안에 의해 간접적으로 사용됨)
     int aperture = 3;       // Sobel aperture
     double k = 0.04;        // Harris detector 자유 매개변수
-    int gaussianSize = 7;   // 구조 텐서를 위한 평활화 윈도우 크기
-    double gaussianSigma = 2.0;
+    int gaussian_size = 7;   // 구조 텐서를 위한 평활화 윈도우 크기
+    double gaussian_sigma = 2.0;
 
-    // 1) 영상 기울기 Ix, Iy 계산
-    cv::Mat Ix, Iy;
-    cv::Sobel(fgray, Ix, CV_32F, 1, 0, aperture);
-    cv::Sobel(fgray, Iy, CV_32F, 0, 1, aperture);
+    // 2. 영상 기울기 ix, iy 계산
+    cv::Mat ix, iy;
+    cv::Sobel(fgray, ix, CV_32F, 1, 0, aperture);
+    cv::Sobel(fgray, iy, CV_32F, 0, 1, aperture);
 
-    // 2) 모든 픽셀에서 미분 곱 계산: Ixx, Iyy, Ixy
-    cv::Mat Ixx = Ix.mul(Ix);
-    cv::Mat Iyy = Iy.mul(Iy);
-    cv::Mat Ixy = Ix.mul(Iy);
+    // 3. 모든 픽셀에서 미분 곱 계산: ixx, iyy, ixy
+    cv::Mat ixx = ix.mul(ix);
+    cv::Mat iyy = iy.mul(iy);
+    cv::Mat ixy = ix.mul(iy);
 
-    // 3) 곱의 합을 얻기 위해 가우시안 필터 적용 (구조 텐서 성분)
-    cv::Mat Sxx, Syy, Sxy;
-    cv::GaussianBlur(Ixx, Sxx, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
-    cv::GaussianBlur(Iyy, Syy, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
-    cv::GaussianBlur(Ixy, Sxy, cv::Size(gaussianSize, gaussianSize), gaussianSigma);
+    // 4. 곱의 합을 얻기 위해 가우시안 필터 적용 (구조 텐서 성분)
+    cv::Mat sxx, syy, sxy;
+    cv::GaussianBlur(ixx, sxx, cv::Size(gaussian_size, gaussian_size), gaussian_sigma);
+    cv::GaussianBlur(iyy, syy, cv::Size(gaussian_size, gaussian_size), gaussian_sigma);
+    cv::GaussianBlur(ixy, sxy, cv::Size(gaussian_size, gaussian_size), gaussian_sigma);
 
-    // 4) 각 픽셀에 대해 Harris 응답 R = det(M) - k * trace(M)^2 계산
+    // 5. 각 픽셀에 대해 Harris 응답 R = det(M) - k * trace(M)^2 계산
     cv::Mat response = cv::Mat::zeros(fgray.size(), CV_32F);
     for (int y = 0; y < fgray.rows; ++y) {
-        float* rptr = response.ptr<float>(y);
-        const float* sxx = Sxx.ptr<float>(y);
-        const float* syy = Syy.ptr<float>(y);
-        const float* sxy = Sxy.ptr<float>(y);
+        float* pres = response.ptr<float>(y);
+        const float* psxx = sxx.ptr<float>(y);
+        const float* psyy = syy.ptr<float>(y);
+        const float* psxy = sxy.ptr<float>(y);
         for (int x = 0; x < fgray.cols; ++x) {
-            float a = sxx[x];
-            float b = sxy[x];
-            float c = syy[x];
+            float a = psxx[x];
+            float b = psxy[x];
+            float c = psyy[x];
             float det = a * c - b * b;
             float trace = a + c;
-            rptr[x] = det - static_cast<float>(k * trace * trace);
+            pres[x] = det - static_cast<float>(k * trace * trace);
         }
     }
 
-    // 5) 임계값 및 비최대 억제 (3x3 이웃)
-    double minVal, maxVal;
-    cv::minMaxLoc(response, &minVal, &maxVal);
+    // 6. 임계값 및 비최대 억제 (3x3 이웃)
+    double min_val, max_val;
+    cv::minMaxLoc(response, &min_val, &max_val);
     // 최대 응답에 대한 상대 임계값
-    float thresh = static_cast<float>(0.01 * maxVal);
+    float thresh = static_cast<float>(0.01 * max_val);
 
     cv::Mat corners = cv::Mat::zeros(response.size(), CV_8U);
-    int neighborhood = 1; // NMS를 위한 반경 (1 -> 3x3)
+    int nsize = 1; // NMS를 위한 반경 (1 -> 3x3)
 
-    for (int y = neighborhood; y < response.rows - neighborhood; ++y) {
-        for (int x = neighborhood; x < response.cols - neighborhood; ++x) {
+    for (int y = nsize; y < response.rows - nsize; ++y) {
+        for (int x = nsize; x < response.cols - nsize; ++x) {
             float val = response.at<float>(y, x);
-            if (val <= thresh) continue;
-            bool isMax = true;
-            for (int dy = -neighborhood; dy <= neighborhood && isMax; ++dy) {
-                for (int dx = -neighborhood; dx <= neighborhood; ++dx) {
-                    if (dy == 0 && dx == 0) continue;
-                    if (response.at<float>(y + dy, x + dx) > val) { isMax = false; break; }
+            if (val <= thresh) 
+                continue;
+
+            bool is_max = true;
+            for (int dy = -nsize; dy <= nsize && is_max; ++dy) {
+                for (int dx = -nsize; dx <= nsize; ++dx) {
+                    if (dy == 0 && dx == 0) 
+                        continue;
+
+                    if (response.at<float>(y + dy, x + dx) > val) { 
+                        is_max = false; break; 
+                    }
                 }
             }
-            if (isMax) corners.at<uchar>(y, x) = 255;
+            if (is_max) 
+                corners.at<uchar>(y, x) = 255;
         }
     }
 
-    // 6) 결과 이미지에 코너 그리기
+    // 7. 결과 이미지에 코너 그리기
     cv::Mat result = src.clone();
     for (int y = 0; y < corners.rows; ++y) {
         const uchar* crow = corners.ptr<uchar>(y);
@@ -96,11 +104,11 @@ int main()
     }
 
     // 중간 및 최종 결과 표시
-    cv::imshow("Gray", gray);
-    cv::imshow("Harris Response (normalized)", response / static_cast<float>(maxVal));
-    cv::imshow("Corners", corners);
+    //cv::imshow("Gray", gray);
+    //cv::imshow("Harris Response (normalized)", response / static_cast<float>(max_val));
+    //cv::imshow("Corners", corners);
     cv::imshow("Detected Corners", result);
-    cv::imwrite("harris_output.png", result);
+    cv::imwrite("../assets/harris_output.png", result);
     cv::waitKey(0);
 
     return 0;
