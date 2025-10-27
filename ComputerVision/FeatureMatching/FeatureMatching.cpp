@@ -2,6 +2,10 @@
 //
 
 #include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <opencv2/opencv.hpp>
 
 int main()
 {
