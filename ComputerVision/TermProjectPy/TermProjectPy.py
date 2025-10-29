@@ -1,47 +1,47 @@
-# ÇÊ¿äÇÑ ¶óÀÌºê·¯¸®¸¦ ¼³Ä¡ÇØ¾ß ÇÕ´Ï´Ù.
+ï»¿# í•„ìš”í•œ ë¼ì´ë¸ŒëŸ¬ë¦¬ë¥¼ ì„¤ì¹˜í•´ì•¼ í•©ë‹ˆë‹¤.
 # pip install ultralytics opencv-python
 
 import cv2
 from ultralytics import YOLO
 
-# »çÀü ÈÆ·ÃµÈ YOLOv8 ¸ðµ¨À» ·ÎµåÇÕ´Ï´Ù. 'yolov8n.pt'´Â °¡Àå ÀÛ°í ºü¸¥ ¸ðµ¨ÀÔ´Ï´Ù.
-# ¼º´ÉÀÌ ´õ ÁÁÀº ¸ðµ¨À» ¿øÇÏ½Ã¸é 'yolov8s.pt', 'yolov8m.pt' µîÀ» »ç¿ëÇÒ ¼ö ÀÖ½À´Ï´Ù.
+# ì‚¬ì „ í›ˆë ¨ëœ YOLOv8 ëª¨ë¸ì„ ë¡œë“œí•©ë‹ˆë‹¤. 'yolov8n.pt'ëŠ” ê°€ìž¥ ìž‘ê³  ë¹ ë¥¸ ëª¨ë¸ìž…ë‹ˆë‹¤.
+# ì„±ëŠ¥ì´ ë” ì¢‹ì€ ëª¨ë¸ì„ ì›í•˜ì‹œë©´ 'yolov8s.pt', 'yolov8m.pt' ë“±ì„ ì‚¬ìš©í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤.
 model = YOLO('yolov8n.pt')
 
-# Ã³¸®ÇÒ ºñµð¿À ÆÄÀÏ °æ·Î¸¦ ÁöÁ¤ÇÕ´Ï´Ù.
-# ¿¹: video_path = 'my_video.mp4'
-# À¥Ä·À» »ç¿ëÇÏ·Á¸é video_path = 0 À¸·Î ¼³Á¤ÇÏ¼¼¿ä.
-video_path = 'path_to_your_video.mp4' # <<< ¿©±â¿¡ ºñµð¿À ÆÄÀÏ °æ·Î¸¦ ÀÔ·ÂÇÏ¼¼¿ä.
+# ì²˜ë¦¬í•  ë¹„ë””ì˜¤ íŒŒì¼ ê²½ë¡œë¥¼ ì§€ì •í•©ë‹ˆë‹¤.
+# ì˜ˆ: video_path = 'my_video.mp4'
+# ì›¹ìº ì„ ì‚¬ìš©í•˜ë ¤ë©´ video_path = 0 ìœ¼ë¡œ ì„¤ì •í•˜ì„¸ìš”.
+video_path = 'D:\\Downloads\\CaliforniaFreeway.mp4' # <<< ì—¬ê¸°ì— ë¹„ë””ì˜¤ íŒŒì¼ ê²½ë¡œë¥¼ ìž…ë ¥í•˜ì„¸ìš”.
 cap = cv2.VideoCapture(video_path)
 
-# ºñµð¿À Ä¸Ã³°¡ ¼º°øÀûÀ¸·Î ¿­·È´ÂÁö È®ÀÎÇÕ´Ï´Ù.
+# ë¹„ë””ì˜¤ ìº¡ì²˜ê°€ ì„±ê³µì ìœ¼ë¡œ ì—´ë ¸ëŠ”ì§€ í™•ì¸í•©ë‹ˆë‹¤.
 if not cap.isOpened():
-    print(f"¿À·ù: ºñµð¿À ÆÄÀÏÀ» ¿­ ¼ö ¾ø½À´Ï´Ù. °æ·Î¸¦ È®ÀÎÇÏ¼¼¿ä: {video_path}")
+    print(f"ì˜¤ë¥˜: ë¹„ë””ì˜¤ íŒŒì¼ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ê²½ë¡œë¥¼ í™•ì¸í•˜ì„¸ìš”: {video_path}")
 else:
     while cap.isOpened():
-        # ºñµð¿À¿¡¼­ ÇÑ ÇÁ·¹ÀÓ¾¿ ÀÐ¾î¿É´Ï´Ù.
+        # ë¹„ë””ì˜¤ì—ì„œ í•œ í”„ë ˆìž„ì”© ì½ì–´ì˜µë‹ˆë‹¤.
         success, frame = cap.read()
 
         if success:
-            # YOLOv8 ¸ðµ¨À» »ç¿ëÇÏ¿© ÇÁ·¹ÀÓ¿¡¼­ °´Ã¼¸¦ Å½ÁöÇÕ´Ï´Ù.
+            # YOLOv8 ëª¨ë¸ì„ ì‚¬ìš©í•˜ì—¬ í”„ë ˆìž„ì—ì„œ ê°ì²´ë¥¼ íƒì§€í•©ë‹ˆë‹¤.
             results = model(frame)
-
-            # Å½ÁöµÈ °´Ã¼ Á¤º¸¸¦ ÇÁ·¹ÀÓ¿¡ ½Ã°¢È­ÇÕ´Ï´Ù.
+            
+            # íƒì§€ëœ ê°ì²´ ì •ë³´ë¥¼ í”„ë ˆìž„ì— ì‹œê°í™”í•©ë‹ˆë‹¤.
             annotated_frame = results[0].plot()
 
-            # °á°ú ÇÁ·¹ÀÓÀ» È­¸é¿¡ Ç¥½ÃÇÕ´Ï´Ù.
+            # ê²°ê³¼ í”„ë ˆìž„ì„ í™”ë©´ì— í‘œì‹œí•©ë‹ˆë‹¤.
             cv2.imshow("YOLOv8 ADAS", annotated_frame)
 
-            # 'q' Å°¸¦ ´©¸£¸é ·çÇÁ¸¦ Á¾·áÇÕ´Ï´Ù.
+            # 'q' í‚¤ë¥¼ ëˆ„ë¥´ë©´ ë£¨í”„ë¥¼ ì¢…ë£Œí•©ë‹ˆë‹¤.
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
         else:
-            # ºñµð¿ÀÀÇ ³¡¿¡ µµ´ÞÇÏ¸é ·çÇÁ¸¦ Á¾·áÇÕ´Ï´Ù.
-            print("ºñµð¿ÀÀÇ ³¡¿¡ µµ´ÞÇß½À´Ï´Ù.")
+            # ë¹„ë””ì˜¤ì˜ ëì— ë„ë‹¬í•˜ë©´ ë£¨í”„ë¥¼ ì¢…ë£Œí•©ë‹ˆë‹¤.
+            print("ë¹„ë””ì˜¤ì˜ ëì— ë„ë‹¬í–ˆìŠµë‹ˆë‹¤.")
             break
 
-# ¸ðµç ¸®¼Ò½º¸¦ ÇØÁ¦ÇÕ´Ï´Ù.
+# ëª¨ë“  ë¦¬ì†ŒìŠ¤ë¥¼ í•´ì œí•©ë‹ˆë‹¤.
 cap.release()
 cv2.destroyAllWindows()
 
-print("ÇÁ·Î±×·¥À» Á¾·áÇÕ´Ï´Ù.")
+print("í”„ë¡œê·¸ëž¨ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.")
