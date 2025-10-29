@@ -11,7 +11,7 @@ model = YOLO('yolov8n.pt')
 # 처리할 비디오 파일 경로를 지정합니다.
 # 예: video_path = 'my_video.mp4'
 # 웹캠을 사용하려면 video_path = 0 으로 설정하세요.
-video_path = 'D:\\Downloads\\CaliforniaFreeway.mp4' # <<< 여기에 비디오 파일 경로를 입력하세요.
+video_path = 'D:\\Downloads\\DrivingSample.mp4' # <<< 여기에 비디오 파일 경로를 입력하세요.
 cap = cv2.VideoCapture(video_path)
 
 # 비디오 캡처가 성공적으로 열렸는지 확인합니다.

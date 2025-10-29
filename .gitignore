@@ -3,7 +3,6 @@
 ################################################################################
 
 /ComputerSystem/TermProject/TermProject/x64/Debug
-/ComputerSystem/TermProject/.vs/TermProject
 /ComputerSystem/TermProject/x64/Debug
 /ComputerSystem/TermProject/asm TermProject
 /ComputerSystem/TermProject/x86asm TermProject
@@ -13,11 +12,63 @@
 /MachineLearning/TermProject/__pycache__
 *.pth
 
-/ComputerVision/.vs/ComputerVision
 /ComputerVision/HoughLineDetect/x64
 /ComputerVision/x64
-/ComputerVision/.vs/CopilotSnapshots/CF207D54828D8D44B6D2FB187B59E170
 /ComputerVision/HarrisCornerDetector/x64/Debug
 /ComputerVision/FeatureMatching/x64/Debug
 /ComputerVision/TermProject/x64/Debug
-/ComputerVision/.vs/CopilotSnapshots/8DF95EB52A021C42A2183A27A52C3221
+
+
+################################################################################
+# Unity3D project ignores (for a new ADAS_v1 Unity project)
+# Added: Unity common generated folders, IDE files, OS artifacts, build outputs
+################################################################################
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+sysinfo.txt
+
+# Visual Studio / Rider / IDE
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.sdf
+*.opendb
+*.VC.db
+.idea/
+*.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Packages / Gradle / local settings
+Packages/packages-lock.json
+.gradle/
+local.properties
+
+# Build outputs / archives
+*.apk
+*.aab
+*.unitypackage
+
+# Cache / package caches
+Library/PackageCache/
+Library/ScriptAssemblies/
+
+# Notes:
+# - Do NOT ignore Unity .meta files; they must be tracked in version control.
+# - These rules will cover the `ADAS_v1` Unity project folder when added to the repo.
