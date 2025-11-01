@@ -72,3 +72,5 @@ Library/ScriptAssemblies/
 # Notes:
 # - Do NOT ignore Unity .meta files; they must be tracked in version control.
 # - These rules will cover the `ADAS_v1` Unity project folder when added to the repo.
+/ComputerVision/assets/face_crop.jpg
+/ComputerVision/assets/FeatureMatching_result.png
