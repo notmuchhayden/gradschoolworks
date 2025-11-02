@@ -6,7 +6,7 @@ using System.Diagnostics;
 public class PythonRunner : MonoBehaviour
 {
     [SerializeField]
-    string pythonScriptPath = "Assets/_Main/Scripts/test_script.py";
+    string pythonScriptPath = "D:\\Works\\gradschoolworks\\ComputerVision\\TermProjectPy\\TermProjectPy.py";
 
     // Start is called before the first frame update
     void Start()
@@ -36,13 +36,13 @@ public class PythonRunner : MonoBehaviour
         process.OutputDataReceived += (sender, e) => {
             if (!string.IsNullOrEmpty(e.Data))
             {
-                UnityEngine.Debug.Log(e.Data);
+                //UnityEngine.Debug.Log(e.Data);
             }
         };
         process.ErrorDataReceived += (sender, e) => {
             if (!string.IsNullOrEmpty(e.Data))
             {
-                UnityEngine.Debug.LogError($"[Python Error] {e.Data}");
+                //UnityEngine.Debug.LogError($"[Python Error] {e.Data}");
             }
         };
 

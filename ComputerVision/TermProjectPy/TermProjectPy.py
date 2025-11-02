@@ -2,6 +2,8 @@
 # pip install ultralytics opencv-python
 
 import cv2
+import socket
+import json
 from ultralytics import YOLO
 
 # 사전 훈련된 YOLOv8 모델을 로드합니다. 'yolov8n.pt'는 가장 작고 빠른 모델입니다.
@@ -14,6 +16,11 @@ model = YOLO('yolov8n.pt')
 video_path = 'D:\\Downloads\\DrivingSample.mp4' # <<< 여기에 비디오 파일 경로를 입력하세요.
 cap = cv2.VideoCapture(video_path)
 
+# UDP 소켓 설정
+UDP_IP = "127.0.0.1"  # Unity3D 서버 IP
+UDP_PORT = 5005       # Unity3D 서버 포트
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
 # 비디오 캡처가 성공적으로 열렸는지 확인합니다.
 if not cap.isOpened():
     print(f"오류: 비디오 파일을 열 수 없습니다. 경로를 확인하세요: {video_path}")
@@ -25,7 +32,24 @@ else:
         if success:
             # YOLOv8 모델을 사용하여 프레임에서 객체를 탐지합니다.
             results = model(frame)
-            
+            boxes = results[0].boxes
+            data_to_send = []
+
+            if boxes is not None and boxes.xyxy is not None:
+                for i in range(len(boxes)):
+                    box = boxes.xyxy[i].cpu().numpy().tolist()  # [x1, y1, x2, y2]
+                    cls = int(boxes.cls[i].cpu().numpy())
+                    conf = float(boxes.conf[i].cpu().numpy())
+                    data_to_send.append({
+                        "class": cls,
+                        "confidence": conf,
+                        "bbox": box
+                    })
+
+            # JSON 문자열로 변환 후 UDP 전송
+            message = json.dumps(data_to_send)
+            sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
+
             # 탐지된 객체 정보를 프레임에 시각화합니다.
             annotated_frame = results[0].plot()
 
@@ -43,5 +67,6 @@ else:
 # 모든 리소스를 해제합니다.
 cap.release()
 cv2.destroyAllWindows()
+sock.close()
 
 print("프로그램을 종료합니다.")
