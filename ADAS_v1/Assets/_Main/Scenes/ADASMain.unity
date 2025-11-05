@@ -235,7 +235,7 @@ PrefabInstance:
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.94
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
@@ -245,27 +245,32 @@ PrefabInstance:
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.99880564
+      value: 0.9990483
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.04885933
+      value: 0.043619405
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 5.6010003
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5196300630081698318, guid: da4ab6101015e51438e272b888b9cbc9,
+        type: 3}
+      propertyPath: field of view
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698318, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
@@ -275,7 +280,7 @@ PrefabInstance:
     - target: {fileID: 5196300630498016810, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.7
+      value: -1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: da4ab6101015e51438e272b888b9cbc9, type: 3}
@@ -536,6 +541,10 @@ MonoBehaviour:
   videoHeight: 720
   instantiateLifetime: 5
   poolSize: 20
+  minScale: 0.5
+  maxScale: 2.5
+  areaSensitivity: 50
+  excludeDistance: 1.5
 --- !u!1 &1872393590
 GameObject:
   m_ObjectHideFlags: 0

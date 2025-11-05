@@ -25,6 +25,21 @@ public class ADASCarController : MonoBehaviour
     [SerializeField]
     int poolSize = 20;
 
+    [Header("Depth scaling by bbox area")]
+    [Tooltip("Scale applied to worldPos.z. Small bbox area -> far (larger scale). Large area -> near (smaller scale)")]
+    [SerializeField]
+    float minScale = 0.5f;
+    [SerializeField]
+    float maxScale = 2.0f;
+    [Tooltip("Sensitivity multiplier applied to normalized bbox area before clamping (higher -> quicker move toward minScale)")]
+    [SerializeField]
+    float areaSensitivity = 10f;
+
+    [Header("Exclusion")]
+    [Tooltip("If the XZ distance from origin is less than or equal to this, the detection will be ignored for pooling.")]
+    [SerializeField]
+    float excludeDistance = 1.5f;
+
     // pool storage
     List<GameObject> pool;
     Transform poolParent;
@@ -85,12 +100,12 @@ public class ADASCarController : MonoBehaviour
             return;
         }
 
-        int used = Mathf.Min(poolSize, latestDetections.Count);
+        int poolIndex = 0;
 
-        // Update used pooled objects with detection positions
-        for (int i = 0; i < used; i++)
+        // Iterate detections, assign to pool sequentially but skip excluded ones
+        for (int di = 0; di < latestDetections.Count && poolIndex < poolSize; di++)
         {
-            var det = latestDetections[i];
+            var det = latestDetections[di];
 
             // bounding box 중심점 계산 (YOLO bbox: x1,y1,x2,y2 in pixels)
             float cx = (det.x1 + det.x2) * 0.5f;
@@ -117,37 +132,59 @@ public class ADASCarController : MonoBehaviour
                 }
             }
 
+            if (!hitPlane)
+                continue;
 
-            var go = pool[i];
-            if (go == null) continue;
+            // Calculate bbox area and normalized ratio
+            float bw = Mathf.Abs(det.x2 - det.x1);
+            float bh = Mathf.Abs(det.y2 - det.y1);
+            float area = bw * bh;
+            float videoArea = Mathf.Max(1, videoWidth * videoHeight);
+            float areaRatio = area / videoArea; // 0..1 (likely small)
 
-            if (hitPlane)
+            // Map area ratio to scale: small area -> maxScale (far), large area -> minScale (near)
+            float mapped = Mathf.Clamp01(areaRatio * areaSensitivity);
+            float scale = Mathf.Lerp(maxScale, minScale, mapped);
+
+            // Apply scale to z coordinate
+            worldPos.z = worldPos.z * scale;
+
+            // Exclusion: if XZ distance to origin is <= excludeDistance, skip this detection
+            Vector2 xz = new Vector2(worldPos.x, worldPos.z);
+            if (xz.magnitude <= excludeDistance)
             {
-                go.transform.position = worldPos;
-                if (!go.activeSelf)
-                    go.SetActive(true);
+                continue;
+            }
 
-                // optional: destroy after lifetime by scheduling deactivation instead of destroy
-                if (instantiateLifetime > 0f)
-                {
-                    // cancel any previous invocation and schedule deactivate
-                    CancelInvoke("DeactivatePoolItem");
-                    Invoke("DeactivatePoolItem", instantiateLifetime);
-                }
-            }
-            else
+            var go = pool[poolIndex];
+            if (go == null)
             {
-                if (go.activeSelf)
-                    go.SetActive(false);
+                poolIndex++;
+                continue;
             }
+
+            worldPos.y = 0.5f; // 약간 띄워서 표시
+            go.transform.position = worldPos;
+
+            if (!go.activeSelf)
+                go.SetActive(true);
+
+            poolIndex++;
         }
 
         // Deactivate unused pool items
-        for (int i = used; i < pool.Count; i++)
+        for (int i = poolIndex; i < pool.Count; i++)
         {
             var go = pool[i];
             if (go != null && go.activeSelf)
                 go.SetActive(false);
+        }
+
+        // optional: schedule global deactivation after lifetime
+        if (instantiateLifetime > 0f)
+        {
+            CancelInvoke("DeactivatePoolItem");
+            Invoke("DeactivatePoolItem", instantiateLifetime);
         }
     }
 

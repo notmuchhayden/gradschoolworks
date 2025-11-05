@@ -5,6 +5,7 @@ import cv2
 import socket
 import json
 from ultralytics import YOLO
+from lane_utils import detect_lanes_hough
 
 # 사전 훈련된 YOLOv8 모델을 로드합니다. 'yolov8n.pt'는 가장 작고 빠른 모델입니다.
 # 성능이 더 좋은 모델을 원하시면 'yolov8s.pt', 'yolov8m.pt' 등을 사용할 수 있습니다.
@@ -50,11 +51,11 @@ else:
             message = json.dumps(data_to_send)
             sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
 
-            # 탐지된 객체 정보를 프레임에 시각화합니다.
-            annotated_frame = results[0].plot()
-
-            # 결과 프레임을 화면에 표시합니다.
-            cv2.imshow("YOLOv8 ADAS", annotated_frame)
+            # YOLO 어노테이트(원하면)와 차선 어노테이트를 합성
+            yolo_annot = results[0].plot()
+            lane_annot = detect_lanes_hough(frame)
+            combined = cv2.addWeighted(yolo_annot, 0.7, lane_annot, 0.3, 0)
+            cv2.imshow("YOLOv8 ADAS", combined)
 
             # 'q' 키를 누르면 루프를 종료합니다.
             if cv2.waitKey(1) & 0xFF == ord("q"):
