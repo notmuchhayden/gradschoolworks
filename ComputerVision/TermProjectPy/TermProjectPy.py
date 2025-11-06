@@ -26,7 +26,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 if not cap.isOpened():
     print(f"오류: 비디오 파일을 열 수 없습니다. 경로를 확인하세요: {video_path}")
 else:
-    while cap.isOpened():
+    paused = False
+    running = True
+    while cap.isOpened() and running:
         # 비디오에서 한 프레임씩 읽어옵니다.
         success, frame = cap.read()
 
@@ -57,9 +59,23 @@ else:
             combined = cv2.addWeighted(yolo_annot, 0.7, lane_annot, 0.3, 0)
             cv2.imshow("YOLOv8 ADAS", combined)
 
-            # 'q' 키를 누르면 루프를 종료합니다.
-            if cv2.waitKey(1) & 0xFF == ord("q"):
+            # 키 입력 처리: 'p'로 일시정지 토글, 'q'로 종료
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
                 break
+            if key == ord('p'):
+                paused = True
+
+            # 일시정지 상태일 때: 'p'로 재개, 'q'로 종료
+            while paused:
+                k = cv2.waitKey(0) & 0xFF
+                if k == ord('p'):
+                    paused = False
+                    break
+                elif k == ord('q'):
+                    paused = False
+                    running = False
+                    break
         else:
             # 비디오의 끝에 도달하면 루프를 종료합니다.
             print("비디오의 끝에 도달했습니다.")
