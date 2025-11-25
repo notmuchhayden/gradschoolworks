@@ -5,10 +5,10 @@ import numpy as np
 @dataclass
 class ROIConfig:
     bottom_left: float = 0.01
-    top_left: float = 0.45
-    top_right: float = 0.55
+    top_left: float = 0.42
+    top_right: float = 0.58
     bottom_right: float = 0.99
-    top_y: float = 0.6
+    top_y: float = 0.55
 
 def color_mask_hls(img):
     hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
@@ -79,34 +79,61 @@ def average_slope_intercept(lines, img_shape):
     right_lines = []
     if lines is None:
         return None, None
+    
+    h, w = img_shape[:2]
+    center_x = w / 2  # 화면 중심 x 좌표
+    
+    # 얻어진 직선에서 기울기와 절편 계산
+    # 선분의 중심점이 화면 중심 기준 좌우 어디에 있는지로 분류
     for line in lines:
         x1, y1, x2, y2 = line.reshape(4)
         if x2 == x1:
             continue
         slope = (y2 - y1) / (x2 - x1)
-        if abs(slope) < 0.4: # 거의 수평선 무시
+        if abs(slope) < 0.4:
             continue
         intercept = y1 - slope * x1
-        if slope < 0:
+        
+        # 선분의 중심 x 좌표 계산
+        mid_x = (x1 + x2) / 2
+        
+        # 화면 중심을 기준으로 좌우 분류
+        if mid_x < center_x:
             left_lines.append((slope, intercept))
         else:
             right_lines.append((slope, intercept))
-    h = img_shape[0]
-    def make_line(avg):
-        slope, intercept = avg
+    
+    h = img_shape[0] # 이미지 높이
+    
+    def make_line(lines_list):
+        if not lines_list:
+            return None
+        # RANSAC 또는 중앙값 사용 (이상치 제거)
+        slopes, intercepts = zip(*lines_list)
+        # 기울기와 절편의 중앙값을 계산하여 대표값 획득
+        slope = np.median(slopes)
+        intercept = np.median(intercepts)
+        
+        # 이미지 하단을 기준으로 60% 지점까지 y 좌표 설정
         y1 = h
         y2 = int(h * 0.6)
+
+        # slope가 0에 가까우면 None 반환
+        if abs(slope) < 0.01:
+            return None
+
+        # 기울기와 절편으로부터 x 좌표 계산
         x1 = int((y1 - intercept) / slope)
         x2 = int((y2 - intercept) / slope)
+
         return np.array([x1, y1, x2, y2])
-    left_avg = np.mean(left_lines, axis=0) if left_lines else None
-    right_avg = np.mean(right_lines, axis=0) if right_lines else None
-    left = make_line(left_avg) if left_avg is not None else None
-    right = make_line(right_avg) if right_avg is not None else None
+    
+    left = make_line(left_lines)
+    right = make_line(right_lines)
     return left, right
 
 def detect_lanes_hough(frame, roi_config: ROIConfig = None):
-    # 입력: BGR 이미지, 출력: BGR 이미지(차선이 그려진)
+    # 입력: BGR 이미지, 출력: (BGR 이미지(차선이 그려진), 좌우 차선 정보)
     if roi_config is None:
         roi_config = ROIConfig()
 
@@ -122,12 +149,22 @@ def detect_lanes_hough(frame, roi_config: ROIConfig = None):
     edges_roi = region_of_interest(edges, roi_config=roi_config)
     # 4. HoughLinesP
     lines = cv2.HoughLinesP(edges_roi, rho=1, theta=np.pi / 180, threshold=50, minLineLength=30, maxLineGap=50)
-    left, right = average_slope_intercept(lines, img.shape)
     line_img = np.zeros_like(img)
+
+    # 평균 기울기-절편 방법으로 좌우 차선 계산
+    left, right = average_slope_intercept(lines, img.shape)
+    
+    # 차선 그리기
     if left is not None:
         cv2.line(line_img, (left[0], left[1]), (left[2], left[3]), (0, 255, 0), 8)
     if right is not None:
         cv2.line(line_img, (right[0], right[1]), (right[2], right[3]), (0, 255, 0), 8)
+
     # 5. 합성
     combo = cv2.addWeighted(img, 0.8, line_img, 1.0, 0.0)
-    return combo
+    
+    # 차선 정보를 딕셔너리로 반환 (None이면 빈 딕셔너리)
+    left_lane = {"x1": int(left[0]), "y1": int(left[1]), "x2": int(left[2]), "y2": int(left[3])} if left is not None else None
+    right_lane = {"x1": int(right[0]), "y1": int(right[1]), "x2": int(right[2]), "y2": int(right[3])} if right is not None else None
+    
+    return combo, left_lane, right_lane

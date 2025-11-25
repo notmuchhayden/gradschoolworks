@@ -49,18 +49,32 @@ else:
                     cls = int(boxes.cls[i].cpu().numpy())
                     conf = float(boxes.conf[i].cpu().numpy())
                     data_to_send.append({
+                        "type": "cars",
                         "class": cls,
                         "confidence": conf,
                         "bbox": box,
                     })
 
-                # JSON 문자열로 변환 후 UDP 전송
-                message = json.dumps(data_to_send)
-                sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
-
             # YOLO 어노테이트(원하면)와 차선 어노테이트를 합성
             yolo_annot = results[0].plot()
-            lane_annot = detect_lanes_hough(frame, roi_config=roi)
+            lane_annot, left_lane, right_lane = detect_lanes_hough(frame, roi_config=roi)
+
+            # 차선 정보를 data_to_send에 추가
+            lane_data = {}
+            if left_lane is not None:
+                lane_data["left_lane"] = left_lane
+            if right_lane is not None:
+                lane_data["right_lane"] = right_lane
+            
+            if lane_data:
+                data_to_send.append({
+                    "type": "lanes",
+                    "data": lane_data
+                })
+
+            # JSON 문자열로 변환 후 UDP 전송
+            message = json.dumps(data_to_send)
+            sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
 
             # ROI 시각화를 원하면 combined 이미지 위에 visualize_region_of_interest를 적용
             combined = cv2.addWeighted(yolo_annot,0.7, lane_annot,0.3,0)
