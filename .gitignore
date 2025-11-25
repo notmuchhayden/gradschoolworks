@@ -74,3 +74,5 @@ Library/ScriptAssemblies/
 # - These rules will cover the `ADAS_v1` Unity project folder when added to the repo.
 /ComputerVision/assets/face_crop.jpg
 /ComputerVision/assets/FeatureMatching_result.png
+/ComputerVision/TermProjectPy/__pycache__/lane_utils.cpython-313.pyc
+/ComputerVision/TermProjectPy/__pycache__/lane_utils.cpython-313.pyc
