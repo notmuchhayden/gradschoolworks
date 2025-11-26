@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -6,27 +7,55 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 
+// 자동차 및 사물 인식 인식 경계 박스
 [Serializable]
 public class Detection
 {
-    // Internal representation used by Unity
+    // 유니티 내부에서 사용하기 위한 감지 클래스
     public int classId;
     public float confidence;
-    // bounding box in xyxy pixel coords: x1,y1,x2,y2
+    // 픽셀 단위의 경계 상자 좌표
     public float x1;
     public float y1;
     public float x2;
     public float y2;
 }
 
-// Matches the Python sender JSON structure: {"class": int, "confidence": float, "bbox": [x1,y1,x2,y2]}
+// 차선 인식 직선 좌표 (픽셀 단위)
+[Serializable]
+public class LanePoint
+{
+    public float x1;
+    public float y1;
+    public float x2;
+    public float y2;
+}
+
+// 차선 감지 결과 (왼쪽/오른쪽 차선)
+[Serializable]
+public class LaneDetection
+{
+    public LanePoint left_lane;  // 왼쪽 차선 좌표
+    public LanePoint right_lane; // 오른쪽 차선 좌표
+}
+
+// 파이썬 JSON 전송 구조와 일치: {"type": "cars", "class": int, "confidence": float, "bbox": [x1,y1,x2,y2]}
 [Serializable]
 public class DetectionRaw
 {
-    // `class` is a C# keyword, use verbatim identifier so JsonUtility can map the JSON key
+    // `class` 는 C# 키워드이므로, JsonUtility가 JSON 키를 매핑할 수 있도록 축자 식별자를 사용
+    public string type;
     public int @class;
     public float confidence;
     public float[] bbox;
+}
+
+// 차선 인식 데이터 JSON 전송 구조: {"type": "lanes", "data": { "left_lane": {...}, "right_lane": {...} }}
+[Serializable]
+public class LaneDetectionRaw
+{
+    public string type;
+    public LaneDetection data; // LaneDetection을 직접 재사용
 }
 
 [Serializable]
@@ -37,20 +66,24 @@ public class DetectionRawList
 
 public class UdpReceiver : MonoBehaviour
 {
-    [Tooltip("UDP port to listen on")]
-    public int listenPort = 5005; // matches Python sender default
+    [Tooltip("수신할 UDP 포트")]
+    public int listenPort = 5005; // 파이썬 송신자 기본값과 일치
 
-    // Latest detections parsed on main thread
+    // 메인 스레드에서 파싱된 최신 감지 결과
     public List<Detection> latestDetections = new List<Detection>();
+    
+    // 메인 스레드에서 파싱된 최신 차선 감지 결과
+    public LaneDetection latestLaneDetection = null;
 
-    // Optional action subscribers can use
+    // 구독자가 사용할 수 있는 선택적 액션
     public event Action<List<Detection>> OnDetectionsReceived;
+    public event Action<LaneDetection> OnLaneDetectionReceived;
 
     private UdpClient udpClient;
     private Thread receiveThread;
     private volatile bool running;
 
-    // Internal queue for thread -> main thread handoff
+    // 스레드 -> 메인 스레드 전달을 위한 내부 큐
     private readonly Queue<string> messageQueue = new Queue<string>();
     private readonly object queueLock = new object();
 
@@ -61,7 +94,7 @@ public class UdpReceiver : MonoBehaviour
 
     void Update()
     {
-        // Drain queued messages on main thread and parse
+        // 메인 스레드에서 큐에 쌓인 메시지를 꺼내서 파싱
         while (true)
         {
             string msg = null;
@@ -77,50 +110,152 @@ public class UdpReceiver : MonoBehaviour
 
             try
             {
-                // The Python sender sends a top-level JSON array like:
-                // [{"class":0,"confidence":0.9,"bbox":[x1,y1,x2,y2]}, ...]
-                // Unity's JsonUtility cannot parse top-level arrays, so wrap it into an object:
-                string wrapped = msg.TrimStart();
-                if (wrapped.StartsWith("["))
-                {
-                    wrapped = "{\"detections\":" + msg + "}";
-                }
+                ParseMessage(msg);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning("UdpReceiver: 메시지 파싱 실패: " + ex.Message);
+            }
+        }
+    }
 
-                var rawList = JsonUtility.FromJson<DetectionRawList>(wrapped);
+    void ParseMessage(string msg)
+    {
+        string trimmed = msg.TrimStart();
+        if (!trimmed.StartsWith("["))
+        {
+            Debug.LogWarning("UdpReceiver: JSON 배열이 예상되었지만 다음을 받았습니다: " + msg);
+            return;
+        }
 
-                latestDetections.Clear();
-                if (rawList != null && rawList.detections != null)
+        // 혼합 객체 배열로 파싱
+        // Unity의 JsonUtility는 최상위 배열을 직접 파싱할 수 없으므로
+        // 각 항목을 수동으로 추출하여 개별적으로 파싱합니다
+        ParseMixedArray(msg);
+    }
+
+    void ParseMixedArray(string jsonArray)
+    {
+        // 외부 대괄호 제거 및 항목 파싱
+        jsonArray = jsonArray.Trim();
+        if (jsonArray.StartsWith("[")) jsonArray = jsonArray.Substring(1);
+        if (jsonArray.EndsWith("]")) jsonArray = jsonArray.Substring(0, jsonArray.Length - 1);
+
+        // 최상위 쉼표로 분할 (간단한 파서 - 잘 구성된 JSON을 가정)
+        List<string> items = SplitJsonArray(jsonArray);
+
+        latestDetections.Clear();
+        latestLaneDetection = null;
+
+        foreach (var item in items)
+        {
+            string itemTrimmed = item.Trim();
+            if (string.IsNullOrEmpty(itemTrimmed)) continue;
+
+            // type 필드 확인
+            if (itemTrimmed.Contains("\"type\":\"cars\"") || itemTrimmed.Contains("\"type\": \"cars\""))
+            {
+                // 차량 감지로 파싱
+                try
                 {
-                    foreach (var r in rawList.detections)
+                    var raw = JsonUtility.FromJson<DetectionRaw>(itemTrimmed);
+                    if (raw != null)
                     {
                         var d = new Detection();
-                        d.classId = r.@class;
-                        d.confidence = r.confidence;
-                        if (r.bbox != null && r.bbox.Length >= 4)
+                        d.classId = raw.@class;
+                        d.confidence = raw.confidence;
+                        if (raw.bbox != null && raw.bbox.Length >= 4)
                         {
-                            d.x1 = r.bbox[0];
-                            d.y1 = r.bbox[1];
-                            d.x2 = r.bbox[2];
-                            d.y2 = r.bbox[3];
+                            d.x1 = raw.bbox[0];
+                            d.y1 = raw.bbox[1];
+                            d.x2 = raw.bbox[2];
+                            d.y2 = raw.bbox[3];
                         }
                         latestDetections.Add(d);
                     }
                 }
-                // latestDetections 의 첫번째 내용을 Log 로 출력
-                UnityEngine.Debug.Log($"UdpReceiver: Received {latestDetections.Count} detections. First detection: " +
-                    (latestDetections.Count > 0 ? 
-                    $"classId={latestDetections[0].classId}, confidence={latestDetections[0].confidence}, " +
-                    $"bbox=({latestDetections[0].x1}, {latestDetections[0].y1}, {latestDetections[0].x2}, {latestDetections[0].y2})" 
-                    : "N/A"));
-
-
-                OnDetectionsReceived?.Invoke(latestDetections);
+                catch (Exception ex)
+                {
+                    Debug.LogWarning("UdpReceiver: 차량 감지 파싱 실패: " + ex.Message);
+                }
             }
-            catch (Exception ex)
+            else if (itemTrimmed.Contains("\"type\":\"lanes\"") || itemTrimmed.Contains("\"type\": \"lanes\""))
             {
-                Debug.LogWarning("UdpReceiver: Failed to parse message: " + ex.Message);
+                // 차선 감지로 파싱
+                try
+                {
+                    var raw = JsonUtility.FromJson<LaneDetectionRaw>(itemTrimmed);
+                    if (raw != null && raw.data != null)
+                    {
+                        // 파싱된 LaneDetection을 직접 사용
+                        latestLaneDetection = raw.data;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning("UdpReceiver: 차선 감지 파싱 실패: " + ex.Message);
+                }
             }
         }
+
+        // 결과 로그 출력
+        if (latestDetections.Count > 0)
+        {
+            UnityEngine.Debug.Log($"UdpReceiver: {latestDetections.Count}개의 차량 감지를 받았습니다. 첫 번째 감지: " +
+                $"classId={latestDetections[0].classId}, confidence={latestDetections[0].confidence}, " +
+                $"bbox=({latestDetections[0].x1}, {latestDetections[0].y1}, {latestDetections[0].x2}, {latestDetections[0].y2})");
+        }
+
+        if (latestLaneDetection != null)
+        {
+            string leftInfo = latestLaneDetection.left_lane != null ? 
+                $"[{latestLaneDetection.left_lane.x1}, {latestLaneDetection.left_lane.y1}, {latestLaneDetection.left_lane.x2}, {latestLaneDetection.left_lane.y2}]" : "null";
+            string rightInfo = latestLaneDetection.right_lane != null ? 
+                $"[{latestLaneDetection.right_lane.x1}, {latestLaneDetection.right_lane.y1}, {latestLaneDetection.right_lane.x2}, {latestLaneDetection.right_lane.y2}]" : "null";
+            UnityEngine.Debug.Log($"UdpReceiver: 차선 감지를 받았습니다. 왼쪽: {leftInfo}, 오른쪽: {rightInfo}");
+        }
+
+        // 이벤트 호출
+        OnDetectionsReceived?.Invoke(latestDetections);
+        if (latestLaneDetection != null)
+        {
+            OnLaneDetectionReceived?.Invoke(latestLaneDetection);
+        }
+    }
+
+    // 간단한 JSON 배열 분할기 - 깊이 0에서 쉼표로 분할
+    List<string> SplitJsonArray(string content)
+    {
+        List<string> items = new List<string>();
+        int depth = 0;
+        int start = 0;
+
+        for (int i = 0; i < content.Length; i++)
+        {
+            char c = content[i];
+            
+            if (c == '{' || c == '[')
+            {
+                depth++;
+            }
+            else if (c == '}' || c == ']')
+            {
+                depth--;
+            }
+            else if (c == ',' && depth == 0)
+            {
+                items.Add(content.Substring(start, i - start));
+                start = i + 1;
+            }
+        }
+
+        // 마지막 항목 추가
+        if (start < content.Length)
+        {
+            items.Add(content.Substring(start));
+        }
+
+        return items;
     }
 
     void OnDestroy()
@@ -143,11 +278,11 @@ public class UdpReceiver : MonoBehaviour
             running = true;
             receiveThread = new Thread(ReceiveLoop) { IsBackground = true };
             receiveThread.Start();
-            Debug.Log($"UdpReceiver: Listening on port {listenPort}");
+            Debug.Log($"UdpReceiver: 포트 {listenPort}에서 수신 대기 중");
         }
         catch (Exception ex)
         {
-            Debug.LogError("UdpReceiver: Failed to start listener: " + ex.Message);
+            Debug.LogError("UdpReceiver: 리스너 시작 실패: " + ex.Message);
         }
     }
 
@@ -182,7 +317,7 @@ public class UdpReceiver : MonoBehaviour
         {
             try
             {
-                var data = udpClient.Receive(ref remoteEP); // blocking
+                var data = udpClient.Receive(ref remoteEP); // 블로킹
                 if (data != null && data.Length > 0)
                 {
                     var msg = Encoding.UTF8.GetString(data);
@@ -194,16 +329,16 @@ public class UdpReceiver : MonoBehaviour
             }
             catch (SocketException sex)
             {
-                // Socket closed or interrupted
+                // 소켓이 닫히거나 중단됨
                 if (running)
                 {
-                    Debug.LogWarning("UdpReceiver socket exception: " + sex.Message);
+                    Debug.LogWarning("UdpReceiver 소켓 예외: " + sex.Message);
                 }
                 break;
             }
             catch (Exception ex)
             {
-                Debug.LogWarning("UdpReceiver receive error: " + ex.Message);
+                Debug.LogWarning("UdpReceiver 수신 오류: " + ex.Message);
             }
         }
     }

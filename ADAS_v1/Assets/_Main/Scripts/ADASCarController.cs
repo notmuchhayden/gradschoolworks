@@ -9,6 +9,13 @@ public class ADASCarController : MonoBehaviour
     [SerializeField]
     GameObject otherCar;
 
+    // 차선 표시용 게임 오브젝트
+    [SerializeField]
+    GameObject leftLane;
+    [SerializeField]
+    GameObject rightLane;
+
+    // UDP 수신기
     UdpReceiver udpReceiver;
 
     [Header("Source video size (pixels)")]
