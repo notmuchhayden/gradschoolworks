@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed603395ecd5e0b4b8fb28364e98c6f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pythonScriptPath: D:\\Works\\gradschoolworks\\ComputerVision\\TermProjectPy\\TermProjectPy.py
+  pythonScriptPath: _Main/YOLOv8/TermProjectPy.py
 --- !u!4 &126297621
 Transform:
   m_ObjectHideFlags: 0
@@ -235,12 +235,12 @@ PrefabInstance:
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 1.02
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.14
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698313, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
@@ -270,12 +270,22 @@ PrefabInstance:
     - target: {fileID: 5196300630081698318, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: field of view
-      value: 90
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630081698318, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
       propertyPath: far clip plane
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 5196300630498016810, guid: da4ab6101015e51438e272b888b9cbc9,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5196300630498016810, guid: da4ab6101015e51438e272b888b9cbc9,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5196300630498016810, guid: da4ab6101015e51438e272b888b9cbc9,
         type: 3}
@@ -402,7 +412,7 @@ PrefabInstance:
     - target: {fileID: 4335128172061924487, guid: 3808a8b6728450e4f86ac780e375818f,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4335128172061924487, guid: 3808a8b6728450e4f86ac780e375818f,
         type: 3}
@@ -412,7 +422,7 @@ PrefabInstance:
     - target: {fileID: 4335128172061924487, guid: 3808a8b6728450e4f86ac780e375818f,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 15
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4335128172061924487, guid: 3808a8b6728450e4f86ac780e375818f,
         type: 3}
@@ -690,7 +700,7 @@ PrefabInstance:
     - target: {fileID: 4335128172061924487, guid: 3808a8b6728450e4f86ac780e375818f,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.5
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 4335128172061924487, guid: 3808a8b6728450e4f86ac780e375818f,
         type: 3}
@@ -700,7 +710,7 @@ PrefabInstance:
     - target: {fileID: 4335128172061924487, guid: 3808a8b6728450e4f86ac780e375818f,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 15
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4335128172061924487, guid: 3808a8b6728450e4f86ac780e375818f,
         type: 3}
