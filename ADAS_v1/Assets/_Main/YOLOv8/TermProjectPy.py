@@ -18,8 +18,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 video_filename = 'DrivingSample.mp4'  # 파일명이 바뀌면 여기만 수정
 video_path = os.path.join(script_dir, video_filename)
 
-# 웹캠을 사용하려면 video_path = 0 으로 설정하세요.
-# 예외 처리: 파일이 존재하지 않으면 명확한 오류 출력 후 종료
+# 샘플 비디오 파일이 존재하는지 확인
 if not os.path.exists(video_path):
     print(f"오류: 비디오 파일을 찾을 수 없습니다. 기대 경로: {video_path}")
     # 워킹 디렉토리에 파일이 있을 수 있으니 대체 검사
@@ -29,6 +28,7 @@ if not os.path.exists(video_path):
     else:
         raise SystemExit(1)
 
+# 비디오 캡처 객체 생성
 cap = cv2.VideoCapture(video_path)
 
 # UDP 소켓 설정
@@ -85,6 +85,8 @@ else:
                     "type": "lanes",
                     "data": lane_data
                 })
+            # lane_data 디버그용 출력
+            #print("Lane Data:", lane_data)
 
             # JSON 문자열로 변환 후 UDP 전송
             message = json.dumps(data_to_send)

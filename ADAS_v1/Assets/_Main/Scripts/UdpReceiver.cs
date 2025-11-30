@@ -69,10 +69,10 @@ public class UdpReceiver : MonoBehaviour
     [Tooltip("수신할 UDP 포트")]
     public int listenPort = 5005; // 파이썬 송신자 기본값과 일치
 
-    // 메인 스레드에서 파싱된 최신 감지 결과
+    // 최신 객체 감지 결과 저장
     public List<Detection> latestDetections = new List<Detection>();
-    
-    // 메인 스레드에서 파싱된 최신 차선 감지 결과
+
+    // 최신 차선 감지 결과 저장
     public LaneDetection latestLaneDetection = null;
 
     // 구독자가 사용할 수 있는 선택적 액션

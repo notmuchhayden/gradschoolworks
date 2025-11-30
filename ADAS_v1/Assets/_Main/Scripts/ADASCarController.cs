@@ -47,27 +47,27 @@ public class ADASCarController : MonoBehaviour
     [SerializeField]
     float excludeDistance = 1.5f;
 
-    // pool storage
+    // 풀 저장소
     List<GameObject> pool;
     Transform poolParent;
 
-    // Start is called before the first frame update
+    // Start는 첫 프레임 업데이트 전에 호출됩니다.
     void Start()
     {
         udpReceiver = GetComponent<UdpReceiver>();
 
-        // create pool parent to keep hierarchy clean
+        // 계층 구조를 깔끔하게 유지하기 위해 풀의 부모 객체를 생성합니다.
         poolParent = new GameObject("OtherCarPool").transform;
         poolParent.parent = this.transform;
 
-        // initialize pool
+        // 풀을 초기화합니다.
         pool = new List<GameObject>(poolSize);
         if (otherCar != null)
         {
             for (int i = 0; i < poolSize; i++)
             {
                 var go = Instantiate(otherCar, Vector3.zero, Quaternion.identity, poolParent);
-                go.SetActive(false); // invisible until used
+                go.SetActive(false); // 사용될 때까지 비활성화(보이지 않음)
                 pool.Add(go);
             }
         }
@@ -77,7 +77,7 @@ public class ADASCarController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+    // Update는 매 프레임 한 번 호출됩니다.
     void Update()
     {
         if (udpReceiver == null || mainCamera == null || pool == null)
@@ -98,7 +98,7 @@ public class ADASCarController : MonoBehaviour
 
         if (latestDetections == null || latestDetections.Count == 0)
         {
-            // deactivate all pooled objects
+            // 풀에 있는 모든 객체를 비활성화합니다.
             for (int i = 0; i < pool.Count; i++)
             {
                 if (pool[i] != null && pool[i].activeSelf)
@@ -109,26 +109,26 @@ public class ADASCarController : MonoBehaviour
 
         int poolIndex = 0;
 
-        // Iterate detections, assign to pool sequentially but skip excluded ones
+        // 탐지 항목을 반복하여 순차적으로 풀에 할당하되, 제외 조건에 해당하는 것은 건너뜀
         for (int di = 0; di < latestDetections.Count && poolIndex < poolSize; di++)
         {
             var det = latestDetections[di];
 
-            // bounding box 중심점 계산 (YOLO bbox: x1,y1,x2,y2 in pixels)
+            // 경계 상자 중심점 계산 (YOLO bbox: x1,y1,x2,y2, 픽셀 단위)
             float cx = (det.x1 + det.x2) * 0.5f;
             float cy = (det.y1 + det.y2) * 0.5f;
 
             // 변환: 영상 원점이 좌상단이라고 가정
-            float vx = cx / (float)videoWidth;              // 0..1 (left..right)
-            float vy = 1f - (cy / (float)videoHeight);      // 0..1 (bottom..top)
+            float vx = cx / (float)videoWidth;              // 0..1 (왼쪽..오른쪽)
+            float vy = 1f - (cy / (float)videoHeight);      // 0..1 (아래..위)
 
-            // 카메라 뷰포트에서 레이 생성
+            // 카메라 뷰포트에서 레이를 생성합니다.
             Ray ray = mainCamera.ViewportPointToRay(new Vector3(vx, vy, 0f));
 
             Vector3 worldPos = Vector3.zero;
             bool hitPlane = false;
 
-            // XZ 평면(y=0)과의 교차 계산
+            // XZ 평면(y=0)과의 교차를 계산합니다.
             if (Mathf.Abs(ray.direction.y) > 1e-6f)
             {
                 float t = (0f - ray.origin.y) / ray.direction.y;
@@ -142,21 +142,21 @@ public class ADASCarController : MonoBehaviour
             if (!hitPlane)
                 continue;
 
-            // Calculate bbox area and normalized ratio
+            // 바운딩 박스 면적과 정규화된 비율을 계산합니다.
             float bw = Mathf.Abs(det.x2 - det.x1);
             float bh = Mathf.Abs(det.y2 - det.y1);
             float area = bw * bh;
             float videoArea = Mathf.Max(1, videoWidth * videoHeight);
-            float areaRatio = area / videoArea; // 0..1 (likely small)
+            float areaRatio = area / videoArea; // 0..1 (대체로 작은 값)
 
-            // Map area ratio to scale: small area -> maxScale (far), large area -> minScale (near)
+            // 면적 비율을 스케일로 매핑: 작은 면적 -> maxScale(멀리), 큰 면적 -> minScale(가까이)
             float mapped = Mathf.Clamp01(areaRatio * areaSensitivity);
             float scale = Mathf.Lerp(maxScale, minScale, mapped);
 
-            // Apply scale to z coordinate
+            // z 좌표에 스케일을 적용합니다.
             worldPos.z = worldPos.z * scale;
 
-            // Exclusion: if XZ distance to origin is <= excludeDistance, skip this detection
+            // 제외 규칙: XZ 원점으로부터의 거리가 excludeDistance 이하이면 이 탐지를 건너뜁니다.
             Vector2 xz = new Vector2(worldPos.x, worldPos.z);
             if (xz.magnitude <= excludeDistance)
             {
@@ -179,7 +179,7 @@ public class ADASCarController : MonoBehaviour
             poolIndex++;
         }
 
-        // Deactivate unused pool items
+        // 사용되지 않은 풀 항목들을 비활성화합니다.
         for (int i = poolIndex; i < pool.Count; i++)
         {
             var go = pool[i];
@@ -187,7 +187,7 @@ public class ADASCarController : MonoBehaviour
                 go.SetActive(false);
         }
 
-        // optional: schedule global deactivation after lifetime
+        // 선택사항: lifetime 후에 전역 비활성화를 예약합니다.
         if (instantiateLifetime > 0f)
         {
             CancelInvoke("DeactivatePoolItem");
@@ -195,7 +195,7 @@ public class ADASCarController : MonoBehaviour
         }
     }
 
-    // deactivates all pool items (invoked after lifetime)
+    // lifetime 이후 호출되어 모든 풀 항목을 비활성화합니다.
     void DeactivatePoolItem()
     {
         for (int i = 0; i < pool.Count; i++)
