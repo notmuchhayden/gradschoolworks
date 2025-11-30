@@ -33,9 +33,7 @@ def _polygon_from_roi(img_shape, roi_config: ROIConfig):
     return polygon
 
 def region_of_interest(img, roi_config: ROIConfig = None):
-    """
-    이미지에서 관심영역(ROI)을 마스킹합니다. roi_config을 전달하면 해당 비율로 폴리곤을 계산합니다.
-    """
+    
     if roi_config is None:
         roi_config = ROIConfig()
 
@@ -50,11 +48,7 @@ def region_of_interest(img, roi_config: ROIConfig = None):
     return cv2.bitwise_and(img, mask)
 
 def visualize_region_of_interest(img, color=(0,255,0), alpha=0.3, roi_config: ROIConfig = None):
-    """
-    입력 이미지 위에 ROI 폴리곤을 반투명으로 그려서 시각화합니다.
-    roi_config을 전달하면 해당 폴리곤을 사용합니다.
-    반환: ROI가 오버레이된 BGR 이미지
-    """
+    
     if roi_config is None:
         roi_config = ROIConfig()
 

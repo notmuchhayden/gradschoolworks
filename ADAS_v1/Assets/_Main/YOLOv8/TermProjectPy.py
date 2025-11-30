@@ -1,4 +1,4 @@
-﻿# 필요한 라이브러리를 설치해야 합니다.
+﻿# 필수 설치 패키지
 # pip install ultralytics opencv-python
 
 import os
@@ -40,7 +40,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 roi = ROIConfig()
 show_roi_overlay = True
 
-# 비디오 캡처가 성공적으로 열렸는지 확인합니다.
+# 비디오 캡처가 성공적으로 열렸는지 확인
 if not cap.isOpened():
     print(f"오류: 비디오 파일을 열 수 없습니다. 경로를 확인하세요: {video_path}")
 else:
@@ -48,11 +48,11 @@ else:
     running = True
 
     while cap.isOpened() and running:
-        # 비디오에서 한 프레임씩 읽어옵니다.
+        # 비디오에서 한 프레임씩 읽어옴
         success, frame = cap.read()
 
         if success:
-            # YOLOv8 모델을 사용하여 프레임에서 객체를 탐지합니다.
+            # YOLOv8 모델을 사용하여 프레임에서 객체를 탐지
             results = model(frame)
             boxes = results[0].boxes
             data_to_send = []
@@ -69,7 +69,6 @@ else:
                         "bbox": box,
                     })
 
-            # YOLO 어노테이트(원하면)와 차선 어노테이트를 합성
             yolo_annot = results[0].plot()
             lane_annot, left_lane, right_lane = detect_lanes_hough(frame, roi_config=roi)
 
@@ -133,7 +132,7 @@ else:
                 roi.top_right = min(1.0, roi.top_right +0.01)
 
         else:
-            # 비디오의 끝에 도달하면 루프를 종료합니다.
+            # 비디오의 끝에 도달하면 루프를 종료
             print("비디오의 끝에 도달했습니다.")
             break
 
@@ -160,7 +159,7 @@ else:
                 roi.top_left = max(0.0, roi.top_left -0.01)
                 roi.top_right = min(1.0, roi.top_right +0.01)
 
-# 모든 리소스를 해제합니다.
+
 cap.release()
 cv2.destroyAllWindows()
 sock.close()
