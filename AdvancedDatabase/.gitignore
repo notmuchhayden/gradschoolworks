@@ -1,0 +1,39 @@
+# Local Python environment and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Generated experiment data and outputs
+data/
+results/
+logs/
+*.log
+
+# Local database files, dumps, and snapshots
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.sql.gz
+*.backup
+*.bak
+*.snapshot
+
+# Local model/download caches
+.cache/
+models/
+model_cache/
+hf_cache/
+
+# Optional bind-mounted Docker data directories
+postgres_meta_data/
+postgres_pgvector_data/
+qdrant_data/

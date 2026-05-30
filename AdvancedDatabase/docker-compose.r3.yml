@@ -1,0 +1,12 @@
+services:
+  postgres_meta:
+    cpus: 1
+    mem_limit: 2g
+
+  postgres_pgvector:
+    cpus: 1
+    mem_limit: 2g
+
+  qdrant:
+    cpus: 1
+    mem_limit: 2g

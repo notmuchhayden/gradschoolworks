@@ -1,0 +1,35 @@
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Generated experiment input samples
+data_samples/
+data_samples_small/
+
+# Generated experiment outputs
+results/
+logs/
+*.log
+
+# Local environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Large or generated binary artifacts
+*.bin
+*.bmp
+*.ppm
+*.rgb
+*.dat
+*.csv
+
+# Archives and temporary files
+*.zip
+*.tar
+*.tar.gz
+*.tmp
