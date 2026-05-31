@@ -72,6 +72,9 @@ def main() -> None:
     p.add_argument("--output", type=Path, default=Path("results/sync_delay.csv"))
     p.add_argument("--delay-seconds", type=float, default=5.0)
     p.add_argument("--modify-ratio", type=float, default=0.1)
+    p.add_argument("--delay-probe-interval-seconds", type=float, default=5.0)
+    p.add_argument("--delay-max-probes", type=int, default=12)
+    p.add_argument("--delay-probe-docs", type=int, default=20)
     p.add_argument("--mock", action="store_true")
 
     args = parser.parse_args()
@@ -156,6 +159,9 @@ def main() -> None:
             model_name=settings.embedding_model,
             dim=settings.embedding_dim,
             mock=args.mock,
+            delay_probe_interval_seconds=args.delay_probe_interval_seconds,
+            delay_max_probes=args.delay_max_probes,
+            delay_probe_docs=args.delay_probe_docs,
         )
     else:
         parser.error(f"unknown command: {args.command}")

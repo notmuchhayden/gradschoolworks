@@ -25,9 +25,10 @@ def make_modified_docs(docs: list[dict], ratio: float) -> list[dict]:
     for doc in docs[:count]:
         new_doc = dict(doc)
         new_doc["content"] = (
-            "제로트러스트 인증 실패 대응 절차. 기존 접속 장애 문서를 대체하며 "
-            "인증 정책, 단말 신뢰도, 접근 제어 로그를 함께 확인해야 한다. "
-            f"원본 문서 식별자는 {doc['doc_id']}이다."
+            "Zero trust authentication failure response procedure. This document "
+            "replaces the previous access issue article and requires checking "
+            "authentication policy, device trust, and access control logs. "
+            f"The original document identifier is {doc['doc_id']}."
         )
         new_doc["embedding_version"] = int(doc["embedding_version"]) + 1
         new_doc["updated_at"] = datetime.now(timezone.utc).isoformat()
@@ -44,6 +45,9 @@ def run_sync_experiment(
     model_name: str,
     dim: int,
     mock: bool,
+    delay_probe_interval_seconds: float = 5.0,
+    delay_max_probes: int = 12,
+    delay_probe_docs: int = 20,
 ) -> None:
     docs = list(read_jsonl(embedded_documents_path))
     modified = make_modified_docs(docs, modify_ratio)
@@ -65,10 +69,19 @@ def run_sync_experiment(
     )
     new_meaning_hits_before = _measure_qdrant_new_meaning_hits(settings, modified)
 
-    if delay_seconds > 0:
-        time.sleep(delay_seconds)
+    delay_window = _measure_qdrant_delay_window(
+        settings=settings,
+        original_by_doc_id=original_by_doc_id,
+        modified=modified,
+        delay_seconds=delay_seconds,
+        probe_interval_seconds=delay_probe_interval_seconds,
+        max_probes=delay_max_probes,
+        probe_docs=delay_probe_docs,
+    )
 
+    qdrant_vector_update_started = time.perf_counter()
     _update_qdrant_vectors(settings, docs, modified)
+    qdrant_vector_update_latency_ms = (time.perf_counter() - qdrant_vector_update_started) * 1000.0
     qdrant_update_latency_ms = (time.perf_counter() - qdrant_update_started) * 1000.0
     stale_ratio_after = _measure_qdrant_stale_vector_ratio(settings, modified)
     old_meaning_hits_after = _measure_qdrant_old_meaning_hits(
@@ -93,6 +106,13 @@ def run_sync_experiment(
             "old_meaning_retrieval_count_after_sync": old_meaning_hits_after,
             "new_meaning_retrieval_count_before_sync": new_meaning_hits_before,
             "new_meaning_retrieval_count_after_sync": new_meaning_hits_after,
+            "delay_probe_interval_seconds": delay_probe_interval_seconds,
+            "delay_probe_docs": delay_probe_docs,
+            "delay_probe_count": delay_window["probe_count"],
+            "delay_observed_seconds": delay_window["observed_seconds"],
+            "delay_old_meaning_retrieval_total": delay_window["old_meaning_total"],
+            "delay_new_meaning_retrieval_total": delay_window["new_meaning_total"],
+            "qdrant_vector_update_latency_ms": qdrant_vector_update_latency_ms,
             "update_latency_ms": qdrant_update_latency_ms,
         },
         {
@@ -106,6 +126,13 @@ def run_sync_experiment(
             "old_meaning_retrieval_count_after_sync": 0,
             "new_meaning_retrieval_count_before_sync": checked_docs,
             "new_meaning_retrieval_count_after_sync": checked_docs,
+            "delay_probe_interval_seconds": 0.0,
+            "delay_probe_docs": 0,
+            "delay_probe_count": 0,
+            "delay_observed_seconds": 0.0,
+            "delay_old_meaning_retrieval_total": 0,
+            "delay_new_meaning_retrieval_total": 0,
+            "qdrant_vector_update_latency_ms": 0.0,
             "update_latency_ms": pgvector_update_latency_ms,
         },
     ]
@@ -113,6 +140,54 @@ def run_sync_experiment(
         writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         writer.writeheader()
         writer.writerows(rows)
+
+
+def _measure_qdrant_delay_window(
+    settings: Settings,
+    original_by_doc_id: dict[str, dict],
+    modified: list[dict],
+    delay_seconds: float,
+    probe_interval_seconds: float,
+    max_probes: int,
+    probe_docs: int,
+) -> dict[str, float | int]:
+    if delay_seconds <= 0:
+        return {
+            "probe_count": 0,
+            "observed_seconds": 0.0,
+            "old_meaning_total": 0,
+            "new_meaning_total": 0,
+        }
+
+    deadline = time.perf_counter() + delay_seconds
+    interval = max(0.1, probe_interval_seconds)
+    probe_limit = max(1, max_probes)
+    probe_count = 0
+    old_meaning_total = 0
+    new_meaning_total = 0
+    started = time.perf_counter()
+
+    while time.perf_counter() < deadline and probe_count < probe_limit:
+        old_meaning_total += _measure_qdrant_old_meaning_hits(
+            settings, original_by_doc_id, modified, check_limit=probe_docs
+        )
+        new_meaning_total += _measure_qdrant_new_meaning_hits(
+            settings, modified, check_limit=probe_docs
+        )
+        probe_count += 1
+
+        remaining = deadline - time.perf_counter()
+        if remaining <= 0 or probe_count >= probe_limit:
+            break
+        time.sleep(min(interval, remaining))
+
+    observed_seconds = time.perf_counter() - started
+    return {
+        "probe_count": probe_count,
+        "observed_seconds": observed_seconds,
+        "old_meaning_total": old_meaning_total,
+        "new_meaning_total": new_meaning_total,
+    }
 
 
 def _update_meta_only(settings: Settings, modified: list[dict]) -> None:
@@ -205,9 +280,10 @@ def _measure_qdrant_old_meaning_hits(
     settings: Settings,
     original_by_doc_id: dict[str, dict],
     modified: list[dict],
+    check_limit: int = 100,
 ) -> int:
     hit_count = 0
-    for doc in modified[: min(100, len(modified))]:
+    for doc in modified[: min(check_limit, len(modified))]:
         original_doc = original_by_doc_id[doc["doc_id"]]
         hits = search_qdrant(settings, original_doc["embedding"], k=10)
         if doc["doc_id"] in hits:
@@ -215,9 +291,11 @@ def _measure_qdrant_old_meaning_hits(
     return hit_count
 
 
-def _measure_qdrant_new_meaning_hits(settings: Settings, modified: list[dict]) -> int:
+def _measure_qdrant_new_meaning_hits(
+    settings: Settings, modified: list[dict], check_limit: int = 100
+) -> int:
     hit_count = 0
-    for doc in modified[: min(100, len(modified))]:
+    for doc in modified[: min(check_limit, len(modified))]:
         hits = search_qdrant(settings, doc["embedding"], k=10)
         if doc["doc_id"] in hits:
             hit_count += 1

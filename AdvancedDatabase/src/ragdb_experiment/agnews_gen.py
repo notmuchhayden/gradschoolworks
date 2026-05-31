@@ -35,7 +35,7 @@ with out_path.open("w", encoding="utf-8") as f:
             "category": category, # 카테고리 추가
             "year": 2026, # 연도 추가
             "doc_type": "article", # 문서 유형 추가
-            "created_at": (base_time + timedelta(minutes=i)).isoformat(), # 생성 시간 추가 (기준 시간에서 i분씩 증가)
+            "updated_at": (base_time + timedelta(minutes=i)).isoformat(), # 생성 시간 추가 (기준 시간에서 i분씩 증가)
             "embedding_version": 1,
         }
         f.write(json.dumps(doc, ensure_ascii=False) + "\n") # JSONL 형식으로 파일에 쓰기
