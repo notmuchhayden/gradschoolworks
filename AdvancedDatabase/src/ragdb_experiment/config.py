@@ -6,18 +6,26 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Settings:
+    # Qdrant 분리형 구조에서 사용할 PostgreSQL DSN
     postgres_meta_dsn: str = os.getenv(
-        "POSTGRES_META_DSN", "postgresql://rag:rag@localhost:5433/rag_meta"
-    )
+        "POSTGRES_META_DSN", "postgresql://rag:rag@localhost:5433/rag_meta")
+    
+    # pgvector 통합형 구조에서 사용할 PostgreSQL DSN
     postgres_pgvector_dsn: str = os.getenv(
-        "POSTGRES_PGVECTOR_DSN", "postgresql://rag:rag@localhost:5434/rag_vector"
-    )
-    qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
-    qdrant_collection: str = os.getenv("QDRANT_COLLECTION", "documents")
+        "POSTGRES_PGVECTOR_DSN", "postgresql://rag:rag@localhost:5434/rag_vector")
+    
+    # Qdrant 설정
+    qdrant_url: str = os.getenv(
+        "QDRANT_URL", "http://localhost:6333")
+    
+    qdrant_collection: str = os.getenv(
+        "QDRANT_COLLECTION", "documents")
+    
     embedding_model: str = os.getenv(
-        "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
-    )
-    embedding_dim: int = int(os.getenv("EMBEDDING_DIM", "384"))
+        "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+    
+    embedding_dim: int = int(os.getenv(
+        "EMBEDDING_DIM", "384"))
 
 
 def get_settings() -> Settings:
