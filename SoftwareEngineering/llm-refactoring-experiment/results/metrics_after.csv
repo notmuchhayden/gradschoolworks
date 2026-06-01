@@ -1,0 +1,1 @@
+sample_id,model,prompt_type,compile_success,test_success,loc_after,method_count_after,complexity_after,pmd_violations_after,checkstyle_violations_after,duplication_after,primary_failure_type,secondary_failure_type,manual_fix_note

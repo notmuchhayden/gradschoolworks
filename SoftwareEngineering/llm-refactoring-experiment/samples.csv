@@ -1,0 +1,4 @@
+sample_id,smell_type,difficulty,main_file,test_file,public_api,expected_refactoring,note
+LM01,Long Method,Medium,src/main/java/experiment/longmethod/sample01/OrderProcessor.java,src/test/java/experiment/longmethod/sample01/OrderProcessorTest.java,"process(Order order)","Extract Method","할인/배송/세금/메시지 생성 책임이 한 메서드에 섞여 있음"
+DC01,Duplicated Code,Easy,src/main/java/experiment/duplicatedcode/sample01/ReportFormatter.java,src/test/java/experiment/duplicatedcode/sample01/ReportFormatterTest.java,"formatSalesReport(String,int,double), formatInventoryReport(String,int,double)","공통 포맷팅 메서드 추출","두 보고서 메서드에 헤더/본문/상태 포맷 로직이 반복됨"
+LC01,Large Class/Data Class,Medium,src/main/java/experiment/largeclass/sample01/CustomerAccount.java,src/test/java/experiment/largeclass/sample01/CustomerAccountTest.java,"addPurchase(double), refund(double), loyaltyLevel(), summary()","Extract Class","계정 상태, 포인트, 통계, 요약 문자열 책임이 한 클래스에 집중됨"
