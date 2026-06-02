@@ -1,4 +1,0 @@
-sample_id,smell_type,loc_before,method_count_before,complexity_before,pmd_violations_before,checkstyle_violations_before,duplication_before,test_result_before
-LM01,Long Method,80,2,21,,,,
-DC01,Duplicated Code,47,2,13,,,,
-LC01,Large Class/Data Class,85,6,17,,,,
