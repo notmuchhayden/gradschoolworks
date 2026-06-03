@@ -1,0 +1,1043 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m---------< [0;36medu.softwareengineering:llm-refactoring-experiment[0;1m >---------[m
+[[1;34mINFO[m] [1mBuilding LLM Refactoring Experiment 1.0-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36mllm-refactoring-experiment[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/main/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:compile[m [1m(default-compile)[m @ [36mllm-refactoring-experiment[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:testResources[m [1m(default-testResources)[m @ [36mllm-refactoring-experiment[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:testCompile[m [1m(default-testCompile)[m @ [36mllm-refactoring-experiment[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:3.2.5:test[m [1m(default-test)[m @ [36mllm-refactoring-experiment[0;1m ---[m
+[[1;34mINFO[m] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running experiment.[1mRefactoringBehaviorParityTest[m
+[[1;31mERROR[m] [1;31mTests [0;1mrun: [0;1m90[m, [1;31mFailures: [0;1;31m32[m, Errors: 0, Skipped: 0, Time elapsed: 5.472 s[1;31m <<< FAILURE![m -- in experiment.[1mRefactoringBehaviorParityTest[m
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.129 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: clampAndScore ==> expected: <4> but was: <2>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.compareStatic(RefactoringBehaviorParityTest.java:146)
+	at experiment.RefactoringBehaviorParityTest.compareStaticMethods(RefactoringBehaviorParityTest.java:152)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:105)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.068 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: cappedMax ==> expected: <18> but was: <9>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.compareStatic(RefactoringBehaviorParityTest.java:146)
+	at experiment.RefactoringBehaviorParityTest.compareStaticMethods(RefactoringBehaviorParityTest.java:152)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:109)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.064 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: countNonEmpty ==> expected: <4> but was: <2>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.compareStatic(RefactoringBehaviorParityTest.java:146)
+	at experiment.RefactoringBehaviorParityTest.compareStaticMethods(RefactoringBehaviorParityTest.java:152)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:111)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.096 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: process ==> expected: <XYLOPHONE:19:normal> but was: <xylophone:19:normal>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.compareInstance(RefactoringBehaviorParityTest.java:163)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:117)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.057 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: normalizeAndSum ==> expected: <99> but was: <138>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.compareInstance(RefactoringBehaviorParityTest.java:163)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:118)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.068 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:22: error: cannot find symbol
+            routeSummary.update(distanceKm, 2.5);
+                                ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:23: error: cannot find symbol
+            distanceKm += 2.5;
+            ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:30: error: cannot find symbol
+            routeSummary.update(distanceKm, 1.0);
+                                ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:31: error: cannot find symbol
+            distanceKm += 1.0;
+            ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:40: error: cannot find symbol
+        return routeManager.getRouteId() + ":" + routeManager.getDriver() + ":" + stopManager.getStopCount() + ":" + routeSummary.getWaypointCount() + ":" + distanceKm;
+                                                                                                                                                             ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:44: error: cannot find symbol
+        return stopManager.getStopCount() == 0 ? 0.0 : distanceKm / stopManager.getStopCount();
+                                                       ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+6 errors
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.072 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java:47: error: cannot find symbol
+    private Difficulty difficulty;
+            ^
+  symbol:   class Difficulty
+  location: class Course
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java:55: error: cannot find symbol
+    public void setDifficulty(Difficulty difficulty) {
+                              ^
+  symbol:   class Difficulty
+  location: class Course
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java:52: error: cannot find symbol
+        this.difficulty = Difficulty.MEDIUM;
+                          ^
+  symbol:   variable Difficulty
+  location: class Course
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java:64: error: cannot find symbol
+        return difficulty == Difficulty.HARD;
+                             ^
+  symbol:   variable Difficulty
+  location: class Course
+4 errors
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.061 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for qwen25 LargeClass05: java.lang.NoSuchMethodException: refactor.qwen25.LargeClass05_qwt1.addBudget(double)
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.NoSuchMethodException: refactor.qwen25.LargeClass05_qwt1.addBudget(double)
+	at java.base/java.lang.Class.getMethod(Class.java:2397)
+	at experiment.RefactoringBehaviorParityTest.call(RefactoringBehaviorParityTest.java:310)
+	at experiment.RefactoringBehaviorParityTest.callBoth(RefactoringBehaviorParityTest.java:300)
+	at experiment.RefactoringBehaviorParityTest.compareLargeClass05(RefactoringBehaviorParityTest.java:226)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:131)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	... 4 more
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.063 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for qwen25 LargeClass06: java.lang.NoSuchMethodException: refactor.qwen25.LargeClass06_qwt1.renameLibrarian(java.lang.String)
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.NoSuchMethodException: refactor.qwen25.LargeClass06_qwt1.renameLibrarian(java.lang.String)
+	at java.base/java.lang.Class.getMethod(Class.java:2397)
+	at experiment.RefactoringBehaviorParityTest.call(RefactoringBehaviorParityTest.java:310)
+	at experiment.RefactoringBehaviorParityTest.callBoth(RefactoringBehaviorParityTest.java:300)
+	at experiment.RefactoringBehaviorParityTest.compareLargeClass06(RefactoringBehaviorParityTest.java:244)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:132)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	... 4 more
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.079 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: overview ==> expected: <P1:Kim:2:1:true:1:1> but was: <P1:Kim:2:0:true:1:1>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.assertCallEquals(RefactoringBehaviorParityTest.java:304)
+	at experiment.RefactoringBehaviorParityTest.compareLargeClass09(RefactoringBehaviorParityTest.java:280)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:135)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.059 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass10_qwt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass10_qwt1.java:30: error: cannot find symbol
+        if (!locked && occupied < capacity) {
+                                  ^
+  symbol:   variable capacity
+  location: class ItemManager
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass10_qwt1.java:101: error: cannot find symbol
+        return warehouseManager.getWarehouseId() + ":" + supervisorManager.getSupervisor() + ":" + itemManager.getOccupied() + ":" + itemManager.isLocked() + ":" + warehouseManager.shipments().size();
+                               ^
+  symbol:   method getWarehouseId()
+  location: variable warehouseManager of type WarehouseManager
+2 errors
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.051 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: report ==> expected: <report: 1 2 3 | report: 1 2 3> but was: <report: 1 2 3 | report: 1 2 3 | >
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.compareStatic(RefactoringBehaviorParityTest.java:146)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:114)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.047 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: buildStatus ==> expected: <svc|on|clean|fast> but was: <svc|on|clean|fast|>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.compareInstance(RefactoringBehaviorParityTest.java:163)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:119)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.043 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LongMethod05_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LongMethod05_mnt1.java:13: error: incompatible types: String cannot be converted to int
+        appendLabelValue(report, "title", title);
+                                          ^
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+1 error
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.034 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for namotron3 LongMethod10: java.lang.IllegalArgumentException: Unsupported unit: m
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.IllegalArgumentException: Unsupported unit: m
+	at refactor.namotron3.LongMethod10_mnt1.getConversionFactor(LongMethod10_mnt1.java:37)
+	at refactor.namotron3.LongMethod10_mnt1.convertValue(LongMethod10_mnt1.java:16)
+	at refactor.namotron3.LongMethod10_mnt1.convertAndRound(LongMethod10_mnt1.java:7)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at experiment.RefactoringBehaviorParityTest.invoke(RefactoringBehaviorParityTest.java:316)
+	at experiment.RefactoringBehaviorParityTest.compareInstance(RefactoringBehaviorParityTest.java:163)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:126)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	... 4 more
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.068 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for namotron3 LargeClass01: java.lang.ClassNotFoundException: refactor.namotron3.LargeClass01_mnt1
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.ClassNotFoundException: refactor.namotron3.LargeClass01_mnt1
+	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:536)
+	at java.base/java.lang.Class.forName(Class.java:515)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:82)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	... 4 more
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.057 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass02_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass02_mnt1.java:89: error: cannot find symbol
+    private final Reporter reporter = new Reporter();
+                  ^
+  symbol:   class Reporter
+  location: class Ticket
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass02_mnt1.java:89: error: cannot find symbol
+    private final Reporter reporter = new Reporter();
+                                          ^
+  symbol:   class Reporter
+  location: class Ticket
+2 errors
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.041 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:43: error: cannot find symbol
+    private final RouteId id;
+                  ^
+  symbol:   class RouteId
+  location: class Route
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:44: error: cannot find symbol
+    private final Driver driver;
+                  ^
+  symbol:   class Driver
+  location: class Route
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:49: error: cannot find symbol
+    public Route(RouteId id, Driver driver) {
+                 ^
+  symbol:   class RouteId
+  location: class Route
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:49: error: cannot find symbol
+    public Route(RouteId id, Driver driver) {
+                             ^
+  symbol:   class Driver
+  location: class Route
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:16: error: incompatible types: String cannot be converted to Stop
+    public void add(String location) { stops.add(location); }
+                                                 ^
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:17: error: incompatible types: String cannot be converted to Stop
+    public void prepend(String location) { stops.add(0, location); }
+                                                        ^
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:28: error: cannot find symbol
+    public double averageKmPerStop() { return stops.isEmpty() ? 0.0 : totalDistanceKm / stops.size(); }
+                                              ^
+  symbol:   variable stops
+  location: class RouteMetrics
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:28: error: cannot find symbol
+    public double averageKmPerStop() { return stops.isEmpty() ? 0.0 : totalDistanceKm / stops.size(); }
+                                                                                        ^
+  symbol:   variable stops
+  location: class RouteMetrics
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+8 errors
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.035 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:6: error: cannot find symbol
+    private final Difficulty difficulty;
+                  ^
+  symbol:   class Difficulty
+  location: class CourseInfo
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:8: error: cannot find symbol
+    public CourseInfo(String courseCode, String instructor, Difficulty difficulty) {
+                                                            ^
+  symbol:   class Difficulty
+  location: class CourseInfo
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:17: error: cannot find symbol
+    public Difficulty getDifficulty() { return difficulty; }
+           ^
+  symbol:   class Difficulty
+  location: class CourseInfo
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:21: error: cannot find symbol
+    private final List<Integer> scores = new ArrayList<>();
+                  ^
+  symbol:   class List
+  location: class QuizScoreTracker
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:21: error: cannot find symbol
+    private final List<Integer> scores = new ArrayList<>();
+                                             ^
+  symbol:   class ArrayList
+  location: class QuizScoreTracker
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:71: error: cannot find symbol
+        this.courseInfo = new CourseInfo(courseCode, instructor, Difficulty.MEDIUM);
+                                                                 ^
+  symbol:   variable Difficulty
+  location: class LargeClassFacade
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:82: error: cannot find symbol
+        return courseInfo.getDifficulty() == Difficulty.HARD && pubInfo.isPublished();
+                                             ^
+  symbol:   variable Difficulty
+  location: class LargeClassFacade
+7 errors
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.043 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java:77: error: cannot find symbol
+        if (!budget.isFrozen()) {
+                   ^
+  symbol:   method isFrozen()
+  location: variable budget of type Budget
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java:85: error: cannot find symbol
+        if (!budget.isFrozen() && budget.getReserved() >= amount) {
+                   ^
+  symbol:   method isFrozen()
+  location: variable budget of type Budget
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java:147: error: budget has private access in Reservation
+    public void freeze()                { reservation.budget.freeze(); } // 혹은 별도 Freezeable 호출
+                                                     ^
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java:147: error: cannot find symbol
+    public void freeze()                { reservation.budget.freeze(); } // 혹은 별도 Freezeable 호출
+                                                            ^
+  symbol:   method freeze()
+  location: variable budget of type Budget
+4 errors
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.043 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass06_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass06_mnt1.java:27: error: cannot assign a value to final variable librarian
+    public void renameLibrarian(String name) { this.librarian = name; }
+                                                   ^
+1 error
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.068 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: dashboard ==> expected: <S1:solo:2:70:Kim:false> but was: <S1:solo:2:70:Kim:>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.assertCallEquals(RefactoringBehaviorParityTest.java:304)
+	at experiment.RefactoringBehaviorParityTest.compareLargeClass07(RefactoringBehaviorParityTest.java:254)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:133)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.024 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass08_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass08_mnt1.java:49: error: <identifier> expected
+        return samples.isEmpty() ? 0.0 : samples.stream().-mapToDouble(Double::doubleValue).sum() / samples.size();
+                                                          ^
+1 error
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.060 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: overview ==> expected: <P1:Kim:2:1:true:1:1> but was: <::2:1:true:1:1>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.assertCallEquals(RefactoringBehaviorParityTest.java:304)
+	at experiment.RefactoringBehaviorParityTest.compareLargeClass09(RefactoringBehaviorParityTest.java:280)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:135)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.067 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for namotron3 LargeClass10: java.lang.ClassNotFoundException: refactor.namotron3.LargeClass10_mnt1
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.ClassNotFoundException: refactor.namotron3.LargeClass10_mnt1
+	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:536)
+	at java.base/java.lang.Class.forName(Class.java:515)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:82)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	... 4 more
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.029 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/gemma4/LongMethod06_gmt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/gemma4/LongMethod06_gmt1.java:42: error: class, interface, enum, or record expected
+}package experiment.longmethod;
+ ^
+1 error
+
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:38)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:138)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:77)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.045 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for gemma4 LargeClass02: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass02_gmt1
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass02_gmt1
+	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:536)
+	at java.base/java.lang.Class.forName(Class.java:515)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:82)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	... 4 more
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.047 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for gemma4 LargeClass03: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass03_gmt1
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass03_gmt1
+	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:536)
+	at java.base/java.lang.Class.forName(Class.java:515)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:82)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	... 4 more
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.063 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for gemma4 LargeClass04: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass04_gmt1
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass04_gmt1
+	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:536)
+	at java.base/java.lang.Class.forName(Class.java:515)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:82)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	... 4 more
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.061 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: snapshot ==> expected: <A1:Kim:300.0:40.0:60.0:false> but was: <A1:Kim:300.000000:40.000000:60.000000:false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.assertCallEquals(RefactoringBehaviorParityTest.java:304)
+	at experiment.RefactoringBehaviorParityTest.compareLargeClass05(RefactoringBehaviorParityTest.java:229)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:131)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.044 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: status ==> expected: <SN1:9.0:25.0:10.0:1:true> but was: <SN1:9.000000:25.000000:10.000000:1:true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at experiment.RefactoringBehaviorParityTest.assertSameValue(RefactoringBehaviorParityTest.java:377)
+	at experiment.RefactoringBehaviorParityTest.assertCallEquals(RefactoringBehaviorParityTest.java:304)
+	at experiment.RefactoringBehaviorParityTest.compareLargeClass08(RefactoringBehaviorParityTest.java:268)
+	at experiment.RefactoringBehaviorParityTest.runScenario(RefactoringBehaviorParityTest.java:134)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:46)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[[1;31mERROR[m] experiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples -- Time elapsed: 0.035 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Refactored API could not be exercised for gemma4 LargeClass09: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass09_gmt1
+	at org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:42)
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:150)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:50)
+	at experiment.RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3(RefactoringBehaviorParityTest.java:39)
+	at java.base/java.util.Optional.ifPresent(Optional.java:178)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass09_gmt1
+	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:536)
+	at java.base/java.lang.Class.forName(Class.java:515)
+	at experiment.RefactoringBehaviorParityTest.compileAndLoad(RefactoringBehaviorParityTest.java:82)
+	at experiment.RefactoringBehaviorParityTest.assertRefactoringMatches(RefactoringBehaviorParityTest.java:45)
+	... 4 more
+
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mFailures: [m
+[[1;31mERROR[m] [1;31mexperiment.RefactoringBehaviorParityTest.refactoredOutputsMatchOriginalSamples[m
+[[1;34mINFO[m] [1;32m  Run 1: PASS[m
+[[1;31mERROR[m] [1;31m  Run 2: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:105->compareStaticMethods:152->compareStatic:146->assertSameValue:377 clampAndScore ==> expected: <4> but was: <2>[m
+[[1;34mINFO[m] [1;32m  Run 3: PASS[m
+[[1;34mINFO[m] [1;32m  Run 4: PASS[m
+[[1;34mINFO[m] [1;32m  Run 5: PASS[m
+[[1;31mERROR[m] [1;31m  Run 6: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:109->compareStaticMethods:152->compareStatic:146->assertSameValue:377 cappedMax ==> expected: <18> but was: <9>[m
+[[1;34mINFO[m] [1;32m  Run 7: PASS[m
+[[1;31mERROR[m] [1;31m  Run 8: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:111->compareStaticMethods:152->compareStatic:146->assertSameValue:377 countNonEmpty ==> expected: <4> but was: <2>[m
+[[1;34mINFO[m] [1;32m  Run 9: PASS[m
+[[1;34mINFO[m] [1;32m  Run 10: PASS[m
+[[1;31mERROR[m] [1;31m  Run 11: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:117->compareInstance:163->assertSameValue:377 process ==> expected: <XYLOPHONE:19:normal> but was: <xylophone:19:normal>[m
+[[1;31mERROR[m] [1;31m  Run 12: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:118->compareInstance:163->assertSameValue:377 normalizeAndSum ==> expected: <99> but was: <138>[m
+[[1;34mINFO[m] [1;32m  Run 13: PASS[m
+[[1;34mINFO[m] [1;32m  Run 14: PASS[m
+[[1;34mINFO[m] [1;32m  Run 15: PASS[m
+[[1;34mINFO[m] [1;32m  Run 16: PASS[m
+[[1;34mINFO[m] [1;32m  Run 17: PASS[m
+[[1;34mINFO[m] [1;32m  Run 18: PASS[m
+[[1;34mINFO[m] [1;32m  Run 19: PASS[m
+[[1;34mINFO[m] [1;32m  Run 20: PASS[m
+[[1;34mINFO[m] [1;32m  Run 21: PASS[m
+[[1;34mINFO[m] [1;32m  Run 22: PASS[m
+[[1;31mERROR[m] [1;31m  Run 23: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:22: error: cannot find symbol
+            routeSummary.update(distanceKm, 2.5);
+                                ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:23: error: cannot find symbol
+            distanceKm += 2.5;
+            ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:30: error: cannot find symbol
+            routeSummary.update(distanceKm, 1.0);
+                                ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:31: error: cannot find symbol
+            distanceKm += 1.0;
+            ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:40: error: cannot find symbol
+        return routeManager.getRouteId() + ":" + routeManager.getDriver() + ":" + stopManager.getStopCount() + ":" + routeSummary.getWaypointCount() + ":" + distanceKm;
+                                                                                                                                                             ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass03_qwt1.java:44: error: cannot find symbol
+        return stopManager.getStopCount() == 0 ? 0.0 : distanceKm / stopManager.getStopCount();
+                                                       ^
+  symbol:   variable distanceKm
+  location: class LargeClass03_qwt1
+6 errors
+[m
+[[1;31mERROR[m] [1;31m  Run 24: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java:47: error: cannot find symbol
+    private Difficulty difficulty;
+            ^
+  symbol:   class Difficulty
+  location: class Course
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java:55: error: cannot find symbol
+    public void setDifficulty(Difficulty difficulty) {
+                              ^
+  symbol:   class Difficulty
+  location: class Course
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java:52: error: cannot find symbol
+        this.difficulty = Difficulty.MEDIUM;
+                          ^
+  symbol:   variable Difficulty
+  location: class Course
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass04_qwt1.java:64: error: cannot find symbol
+        return difficulty == Difficulty.HARD;
+                             ^
+  symbol:   variable Difficulty
+  location: class Course
+4 errors
+[m
+[[1;31mERROR[m] [1;31m  Run 25: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for qwen25 LargeClass05: java.lang.NoSuchMethodException: refactor.qwen25.LargeClass05_qwt1.addBudget(double)[m
+[[1;31mERROR[m] [1;31m  Run 26: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for qwen25 LargeClass06: java.lang.NoSuchMethodException: refactor.qwen25.LargeClass06_qwt1.renameLibrarian(java.lang.String)[m
+[[1;34mINFO[m] [1;32m  Run 27: PASS[m
+[[1;34mINFO[m] [1;32m  Run 28: PASS[m
+[[1;31mERROR[m] [1;31m  Run 29: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:135->compareLargeClass09:280->assertCallEquals:304->assertSameValue:377 overview ==> expected: <P1:Kim:2:1:true:1:1> but was: <P1:Kim:2:0:true:1:1>[m
+[[1;31mERROR[m] [1;31m  Run 30: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass10_qwt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass10_qwt1.java:30: error: cannot find symbol
+        if (!locked && occupied < capacity) {
+                                  ^
+  symbol:   variable capacity
+  location: class ItemManager
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/qwen25/LargeClass10_qwt1.java:101: error: cannot find symbol
+        return warehouseManager.getWarehouseId() + ":" + supervisorManager.getSupervisor() + ":" + itemManager.getOccupied() + ":" + itemManager.isLocked() + ":" + warehouseManager.shipments().size();
+                               ^
+  symbol:   method getWarehouseId()
+  location: variable warehouseManager of type WarehouseManager
+2 errors
+[m
+[[1;34mINFO[m] [1;32m  Run 31: PASS[m
+[[1;34mINFO[m] [1;32m  Run 32: PASS[m
+[[1;34mINFO[m] [1;32m  Run 33: PASS[m
+[[1;34mINFO[m] [1;32m  Run 34: PASS[m
+[[1;34mINFO[m] [1;32m  Run 35: PASS[m
+[[1;34mINFO[m] [1;32m  Run 36: PASS[m
+[[1;34mINFO[m] [1;32m  Run 37: PASS[m
+[[1;34mINFO[m] [1;32m  Run 38: PASS[m
+[[1;34mINFO[m] [1;32m  Run 39: PASS[m
+[[1;31mERROR[m] [1;31m  Run 40: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:114->compareStatic:146->assertSameValue:377 report ==> expected: <report: 1 2 3 | report: 1 2 3> but was: <report: 1 2 3 | report: 1 2 3 | >[m
+[[1;34mINFO[m] [1;32m  Run 41: PASS[m
+[[1;34mINFO[m] [1;32m  Run 42: PASS[m
+[[1;31mERROR[m] [1;31m  Run 43: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:119->compareInstance:163->assertSameValue:377 buildStatus ==> expected: <svc|on|clean|fast> but was: <svc|on|clean|fast|>[m
+[[1;34mINFO[m] [1;32m  Run 44: PASS[m
+[[1;31mERROR[m] [1;31m  Run 45: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LongMethod05_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LongMethod05_mnt1.java:13: error: incompatible types: String cannot be converted to int
+        appendLabelValue(report, "title", title);
+                                          ^
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+1 error
+[m
+[[1;34mINFO[m] [1;32m  Run 46: PASS[m
+[[1;34mINFO[m] [1;32m  Run 47: PASS[m
+[[1;34mINFO[m] [1;32m  Run 48: PASS[m
+[[1;34mINFO[m] [1;32m  Run 49: PASS[m
+[[1;31mERROR[m] [1;31m  Run 50: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for namotron3 LongMethod10: java.lang.IllegalArgumentException: Unsupported unit: m[m
+[[1;31mERROR[m] [1;31m  Run 51: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for namotron3 LargeClass01: java.lang.ClassNotFoundException: refactor.namotron3.LargeClass01_mnt1[m
+[[1;31mERROR[m] [1;31m  Run 52: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass02_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass02_mnt1.java:89: error: cannot find symbol
+    private final Reporter reporter = new Reporter();
+                  ^
+  symbol:   class Reporter
+  location: class Ticket
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass02_mnt1.java:89: error: cannot find symbol
+    private final Reporter reporter = new Reporter();
+                                          ^
+  symbol:   class Reporter
+  location: class Ticket
+2 errors
+[m
+[[1;31mERROR[m] [1;31m  Run 53: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:43: error: cannot find symbol
+    private final RouteId id;
+                  ^
+  symbol:   class RouteId
+  location: class Route
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:44: error: cannot find symbol
+    private final Driver driver;
+                  ^
+  symbol:   class Driver
+  location: class Route
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:49: error: cannot find symbol
+    public Route(RouteId id, Driver driver) {
+                 ^
+  symbol:   class RouteId
+  location: class Route
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:49: error: cannot find symbol
+    public Route(RouteId id, Driver driver) {
+                             ^
+  symbol:   class Driver
+  location: class Route
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:16: error: incompatible types: String cannot be converted to Stop
+    public void add(String location) { stops.add(location); }
+                                                 ^
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:17: error: incompatible types: String cannot be converted to Stop
+    public void prepend(String location) { stops.add(0, location); }
+                                                        ^
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:28: error: cannot find symbol
+    public double averageKmPerStop() { return stops.isEmpty() ? 0.0 : totalDistanceKm / stops.size(); }
+                                              ^
+  symbol:   variable stops
+  location: class RouteMetrics
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass03_mnt1.java:28: error: cannot find symbol
+    public double averageKmPerStop() { return stops.isEmpty() ? 0.0 : totalDistanceKm / stops.size(); }
+                                                                                        ^
+  symbol:   variable stops
+  location: class RouteMetrics
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+8 errors
+[m
+[[1;31mERROR[m] [1;31m  Run 54: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:6: error: cannot find symbol
+    private final Difficulty difficulty;
+                  ^
+  symbol:   class Difficulty
+  location: class CourseInfo
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:8: error: cannot find symbol
+    public CourseInfo(String courseCode, String instructor, Difficulty difficulty) {
+                                                            ^
+  symbol:   class Difficulty
+  location: class CourseInfo
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:17: error: cannot find symbol
+    public Difficulty getDifficulty() { return difficulty; }
+           ^
+  symbol:   class Difficulty
+  location: class CourseInfo
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:21: error: cannot find symbol
+    private final List<Integer> scores = new ArrayList<>();
+                  ^
+  symbol:   class List
+  location: class QuizScoreTracker
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:21: error: cannot find symbol
+    private final List<Integer> scores = new ArrayList<>();
+                                             ^
+  symbol:   class ArrayList
+  location: class QuizScoreTracker
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:71: error: cannot find symbol
+        this.courseInfo = new CourseInfo(courseCode, instructor, Difficulty.MEDIUM);
+                                                                 ^
+  symbol:   variable Difficulty
+  location: class LargeClassFacade
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass04_mnt1.java:82: error: cannot find symbol
+        return courseInfo.getDifficulty() == Difficulty.HARD && pubInfo.isPublished();
+                                             ^
+  symbol:   variable Difficulty
+  location: class LargeClassFacade
+7 errors
+[m
+[[1;31mERROR[m] [1;31m  Run 55: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java:77: error: cannot find symbol
+        if (!budget.isFrozen()) {
+                   ^
+  symbol:   method isFrozen()
+  location: variable budget of type Budget
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java:85: error: cannot find symbol
+        if (!budget.isFrozen() && budget.getReserved() >= amount) {
+                   ^
+  symbol:   method isFrozen()
+  location: variable budget of type Budget
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java:147: error: budget has private access in Reservation
+    public void freeze()                { reservation.budget.freeze(); } // 혹은 별도 Freezeable 호출
+                                                     ^
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass05_mnt1.java:147: error: cannot find symbol
+    public void freeze()                { reservation.budget.freeze(); } // 혹은 별도 Freezeable 호출
+                                                            ^
+  symbol:   method freeze()
+  location: variable budget of type Budget
+4 errors
+[m
+[[1;31mERROR[m] [1;31m  Run 56: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass06_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass06_mnt1.java:27: error: cannot assign a value to final variable librarian
+    public void renameLibrarian(String name) { this.librarian = name; }
+                                                   ^
+1 error
+[m
+[[1;31mERROR[m] [1;31m  Run 57: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:133->compareLargeClass07:254->assertCallEquals:304->assertSameValue:377 dashboard ==> expected: <S1:solo:2:70:Kim:false> but was: <S1:solo:2:70:Kim:>[m
+[[1;31mERROR[m] [1;31m  Run 58: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass08_mnt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/namotron3/LargeClass08_mnt1.java:49: error: <identifier> expected
+        return samples.isEmpty() ? 0.0 : samples.stream().-mapToDouble(Double::doubleValue).sum() / samples.size();
+                                                          ^
+1 error
+[m
+[[1;31mERROR[m] [1;31m  Run 59: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:135->compareLargeClass09:280->assertCallEquals:304->assertSameValue:377 overview ==> expected: <P1:Kim:2:1:true:1:1> but was: <::2:1:true:1:1>[m
+[[1;31mERROR[m] [1;31m  Run 60: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for namotron3 LargeClass10: java.lang.ClassNotFoundException: refactor.namotron3.LargeClass10_mnt1[m
+[[1;34mINFO[m] [1;32m  Run 61: PASS[m
+[[1;34mINFO[m] [1;32m  Run 62: PASS[m
+[[1;34mINFO[m] [1;32m  Run 63: PASS[m
+[[1;34mINFO[m] [1;32m  Run 64: PASS[m
+[[1;34mINFO[m] [1;32m  Run 65: PASS[m
+[[1;34mINFO[m] [1;32m  Run 66: PASS[m
+[[1;34mINFO[m] [1;32m  Run 67: PASS[m
+[[1;34mINFO[m] [1;32m  Run 68: PASS[m
+[[1;34mINFO[m] [1;32m  Run 69: PASS[m
+[[1;34mINFO[m] [1;32m  Run 70: PASS[m
+[[1;34mINFO[m] [1;32m  Run 71: PASS[m
+[[1;34mINFO[m] [1;32m  Run 72: PASS[m
+[[1;34mINFO[m] [1;32m  Run 73: PASS[m
+[[1;34mINFO[m] [1;32m  Run 74: PASS[m
+[[1;34mINFO[m] [1;32m  Run 75: PASS[m
+[[1;31mERROR[m] [1;31m  Run 76: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:45->compileAndLoad:77 Refactored source did not compile: /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/gemma4/LongMethod06_gmt1.java
+/home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/src/refactor/gemma4/LongMethod06_gmt1.java:42: error: class, interface, enum, or record expected
+}package experiment.longmethod;
+ ^
+1 error
+[m
+[[1;34mINFO[m] [1;32m  Run 77: PASS[m
+[[1;34mINFO[m] [1;32m  Run 78: PASS[m
+[[1;34mINFO[m] [1;32m  Run 79: PASS[m
+[[1;34mINFO[m] [1;32m  Run 80: PASS[m
+[[1;34mINFO[m] [1;32m  Run 81: PASS[m
+[[1;31mERROR[m] [1;31m  Run 82: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for gemma4 LargeClass02: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass02_gmt1[m
+[[1;31mERROR[m] [1;31m  Run 83: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for gemma4 LargeClass03: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass03_gmt1[m
+[[1;31mERROR[m] [1;31m  Run 84: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for gemma4 LargeClass04: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass04_gmt1[m
+[[1;31mERROR[m] [1;31m  Run 85: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:131->compareLargeClass05:229->assertCallEquals:304->assertSameValue:377 snapshot ==> expected: <A1:Kim:300.0:40.0:60.0:false> but was: <A1:Kim:300.000000:40.000000:60.000000:false>[m
+[[1;34mINFO[m] [1;32m  Run 86: PASS[m
+[[1;34mINFO[m] [1;32m  Run 87: PASS[m
+[[1;31mERROR[m] [1;31m  Run 88: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:46->runScenario:134->compareLargeClass08:268->assertCallEquals:304->assertSameValue:377 status ==> expected: <SN1:9.0:25.0:10.0:1:true> but was: <SN1:9.000000:25.000000:10.000000:1:true>[m
+[[1;31mERROR[m] [1;31m  Run 89: RefactoringBehaviorParityTest.lambda$refactoredOutputsMatchOriginalSamples$3:39->assertRefactoringMatches:50 Refactored API could not be exercised for gemma4 LargeClass09: java.lang.ClassNotFoundException: refactor.gemma4.LargeClass09_gmt1[m
+[[1;34mINFO[m] [1;32m  Run 90: PASS[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] 
+[[1;31mERROR[m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;31mBUILD FAILURE[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  7.227 s
+[[1;34mINFO[m] Finished at: 2026-06-03T18:19:12+09:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;31mERROR[m] Failed to execute goal [32morg.apache.maven.plugins:maven-surefire-plugin:3.2.5:test[m [1m(default-test)[m on project [36mllm-refactoring-experiment[m: [1;31mThere are test failures.[m
+[[1;31mERROR[m] [1;31m[m
+[[1;31mERROR[m] [1;31mPlease refer to /home/seaeast2/works/gradschoolworks/SoftwareEngineering/llm-refactoring-experiment/target/surefire-reports for the individual test results.[m
+[[1;31mERROR[m] [1;31mPlease refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.[m
+[[1;31mERROR[m] -> [1m[Help 1][m
+[[1;31mERROR[m] 
+[[1;31mERROR[m] To see the full stack trace of the errors, re-run Maven with the [1m-e[m switch.
+[[1;31mERROR[m] Re-run Maven using the [1m-X[m switch to enable full debug logging.
+[[1;31mERROR[m] 
+[[1;31mERROR[m] For more information about the errors and possible solutions, please read the following articles:
+[[1;31mERROR[m] [1m[Help 1][m http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
