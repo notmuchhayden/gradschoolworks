@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod04 {
     public double estimatePrice(double base, int count, boolean premium, String region) {

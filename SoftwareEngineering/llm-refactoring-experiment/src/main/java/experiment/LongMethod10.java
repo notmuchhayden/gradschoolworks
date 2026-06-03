@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod10 {
     public double convertAndRound(double value, String unit) {

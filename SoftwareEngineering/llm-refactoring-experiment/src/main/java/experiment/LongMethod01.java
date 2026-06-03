@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod01 {
     public String process(String input, int amount) {

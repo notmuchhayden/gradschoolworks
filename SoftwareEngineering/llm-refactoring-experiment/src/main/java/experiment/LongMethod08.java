@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod08 {
     public int computeTax(int income, int dependents, boolean contractor, String city) {

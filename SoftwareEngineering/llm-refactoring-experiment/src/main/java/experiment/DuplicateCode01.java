@@ -1,4 +1,4 @@
-package experiment.duplicatedcode;
+package experiment;
 
 public final class DuplicateCode01 {
     private DuplicateCode01() {

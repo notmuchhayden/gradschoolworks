@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod03 {
     public String buildStatus(String name, boolean enabled, int retries, double latency) {

@@ -1,4 +1,4 @@
-package experiment.duplicatedcode;
+package experiment;
 
 import java.util.HashMap;
 import java.util.Map;

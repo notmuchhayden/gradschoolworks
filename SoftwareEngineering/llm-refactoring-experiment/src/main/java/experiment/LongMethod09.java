@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod09 {
     public String formatAddress(String street, String city, String zip, boolean uppercase) {

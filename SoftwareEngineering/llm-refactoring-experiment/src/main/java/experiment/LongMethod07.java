@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod07 {
     public String classifyTemperature(double temp, double humidity, boolean cloudy) {

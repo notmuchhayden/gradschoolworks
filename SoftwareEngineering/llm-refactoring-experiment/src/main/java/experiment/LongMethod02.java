@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod02 {
     public int normalizeAndSum(int[] values) {

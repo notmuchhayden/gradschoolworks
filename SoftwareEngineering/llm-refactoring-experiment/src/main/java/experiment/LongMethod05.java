@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod05 {
     public String renderReport(String title, int a, int b, int c) {

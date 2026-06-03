@@ -1,4 +1,4 @@
-package experiment.longmethod;
+package experiment;
 
 public class LongMethod06 {
     public boolean checkAccess(String role, int hour, boolean weekend) {

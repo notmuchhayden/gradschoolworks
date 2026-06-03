@@ -1,4 +1,4 @@
-package experiment.largeclass;
+package experiment;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
