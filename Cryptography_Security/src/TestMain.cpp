@@ -237,13 +237,13 @@ int main(int argc, char* argv[]) {
         Salsa20::Nonce salsa_nonce{};
         ChaCha20::Nonce chacha_nonce{};
 
-        // 키는 00, 01, ..., 1f로 구성한다.
+        // 키는 테스트를 위하여 임의로 00, 01, ..., 1f로 구성한다.
         for (std::size_t i = 0; i < salsa_key.size(); ++i) {
             salsa_key[i] = static_cast<std::uint8_t>(i);
             chacha_key[i] = static_cast<std::uint8_t>(i);
         }
 
-        // 논스는 a0, a1, ..., a7로 구성한다.
+        // 논스는 테스트를 위하여 임의로 a0, a1, ..., a7로 구성한다.
         for (std::size_t i = 0; i < salsa_nonce.size(); ++i) {
             salsa_nonce[i] = static_cast<std::uint8_t>(0xa0 + i);
             chacha_nonce[i] = static_cast<std::uint8_t>(0xa0 + i);
@@ -258,8 +258,7 @@ int main(int argc, char* argv[]) {
 
         // 왕복 검사 외에 ChaCha8 외부 기준값과 알고리즘 간 출력 차이를 확인한다.
         const bool chacha_vector_passed = verifyChaCha8KnownVector();
-        const bool cipher_texts_differ =
-            salsa_result.encrypted != chacha_result.encrypted;
+        const bool cipher_texts_differ = salsa_result.encrypted != chacha_result.encrypted;
 
         // 암호문과 복호화 결과를 보고서 확인용 파일로 저장한다.
         writeBinaryFile(
