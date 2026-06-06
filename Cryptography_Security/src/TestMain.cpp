@@ -19,21 +19,21 @@ using Clock = std::chrono::steady_clock;
 
 // 명령행에서 반복 횟수를 생략했을 때 사용하는 기본 측정 횟수.
 // 여러 번 반복한 총 시간을 나누어 짧은 단일 실행의 측정 오차를 줄인다.
-constexpr std::size_t DefaultIterations = 30;
+constexpr std::size_t DEFAULT_ITERATIONS = 30;
 
 // 알고리즘 하나의 출력 데이터, 평균 성능, 정확성 검사 결과를 묶는다.
 // 암호화/복호화 데이터도 보관하여 결과 파일 저장과 교차 검증에 사용한다.
 struct BenchmarkResult {
     std::vector<std::uint8_t> encrypted;
     std::vector<std::uint8_t> decrypted;
-    double encryptionMilliseconds{};
-    double decryptionMilliseconds{};
-    double encryptionMegabytesPerSecond{};
-    double decryptionMegabytesPerSecond{};
-    bool roundTripPassed{};
-    bool ciphertextChanged{};
+    double encryption_milliseconds{};
+    double decryption_milliseconds{};
+    double encryption_megabytes_per_second{};
+    double decryption_megabytes_per_second{};
+    bool round_trip_passed{};
+    bool ciphertext_changed{};
     bool deterministic{};
-    bool counterChangesOutput{};
+    bool counter_changes_output{};
 };
 
 // 파일 전체를 바이너리 모드로 읽는다.
@@ -93,12 +93,12 @@ BenchmarkResult benchmarkCipher(
     result.decrypted = cipher.process(result.encrypted);
 
     // 계획서에서 정의한 네 가지 기본 동작 조건을 먼저 검증한다.
-    result.roundTripPassed = result.decrypted == plaintext;
-    result.ciphertextChanged = result.encrypted != plaintext;
+    result.round_trip_passed = result.decrypted == plaintext;
+    result.ciphertext_changed = result.encrypted != plaintext;
     result.deterministic = cipher.process(plaintext) == result.encrypted;
     // 카운터가 키스트림 생성에 실제로 반영되는지도 별도로 확인한다.
     // 빈 입력은 비교할 출력이 없으므로 통과로 취급한다.
-    result.counterChangesOutput =
+    result.counter_changes_output =
         plaintext.empty() || cipher.process(plaintext, 1) != result.encrypted;
 
     // 파일 읽기/쓰기와 초기 검증은 측정 구간에서 제외한다.
@@ -129,21 +129,21 @@ BenchmarkResult benchmarkCipher(
     const double decryptionTotalMs =
         std::chrono::duration<double, std::milli>(
             decryptionEnd - decryptionStart).count();
-    result.encryptionMilliseconds =
+    result.encryption_milliseconds =
         encryptionTotalMs / static_cast<double>(iterations);
-    result.decryptionMilliseconds =
+    result.decryption_milliseconds =
         decryptionTotalMs / static_cast<double>(iterations);
 
     // 처리량은 이진 메가바이트(MiB = 1024 * 1024바이트)를 기준으로 한다.
     const double mebibytes =
         static_cast<double>(plaintext.size()) / (1024.0 * 1024.0);
-    result.encryptionMegabytesPerSecond =
-        result.encryptionMilliseconds > 0.0
-            ? mebibytes / (result.encryptionMilliseconds / 1000.0)
+    result.encryption_megabytes_per_second =
+        result.encryption_milliseconds > 0.0
+            ? mebibytes / (result.encryption_milliseconds / 1000.0)
             : 0.0;
-    result.decryptionMegabytesPerSecond =
-        result.decryptionMilliseconds > 0.0
-            ? mebibytes / (result.decryptionMilliseconds / 1000.0)
+    result.decryption_megabytes_per_second =
+        result.decryption_milliseconds > 0.0
+            ? mebibytes / (result.decryption_milliseconds / 1000.0)
             : 0.0;
     return result;
 }
@@ -172,36 +172,36 @@ bool verifyChaCha8KnownVector() {
 
 // 알고리즘별 필수 검증 항목을 하나의 최종 조건으로 결합한다.
 bool allChecksPassed(const BenchmarkResult& result) {
-    return result.roundTripPassed &&
-           result.ciphertextChanged &&
+    return result.round_trip_passed &&
+           result.ciphertext_changed &&
            result.deterministic &&
-           result.counterChangesOutput;
+           result.counter_changes_output;
 }
 
 // 알고리즘별 평균 시간, 처리량, 검증 결과를 동일한 형식으로 출력한다.
 void printResult(const std::string& name, const BenchmarkResult& result) {
     std::cout << '\n' << '[' << name << "]\n"
-              << "Encryption average: " << result.encryptionMilliseconds
-              << " ms (" << result.encryptionMegabytesPerSecond << " MiB/s)\n"
-              << "Decryption average: " << result.decryptionMilliseconds
-              << " ms (" << result.decryptionMegabytesPerSecond << " MiB/s)\n"
+              << "Encryption average: " << result.encryption_milliseconds
+              << " ms (" << result.encryption_megabytes_per_second << " MiB/s)\n"
+              << "Decryption average: " << result.decryption_milliseconds
+              << " ms (" << result.decryption_megabytes_per_second << " MiB/s)\n"
               << "Round-trip verification: "
-              << (result.roundTripPassed ? "PASS" : "FAIL") << '\n'
+              << (result.round_trip_passed ? "PASS" : "FAIL") << '\n'
               << "Ciphertext differs from input: "
-              << (result.ciphertextChanged ? "PASS" : "FAIL") << '\n'
+              << (result.ciphertext_changed ? "PASS" : "FAIL") << '\n'
               << "Deterministic output: "
               << (result.deterministic ? "PASS" : "FAIL") << '\n'
               << "Block counter changes output: "
-              << (result.counterChangesOutput ? "PASS" : "FAIL") << '\n';
+              << (result.counter_changes_output ? "PASS" : "FAIL") << '\n';
 }
 
 // 두 번째 명령행 인자를 0보다 큰 반복 횟수로 변환한다.
 // 숫자 뒤에 다른 문자가 붙은 값도 오류로 처리한다.
 std::size_t parseIterations(const char* text) {
     const std::string value(text);
-    std::size_t parsedCharacters = 0;
-    const unsigned long parsed = std::stoul(value, &parsedCharacters);
-    if (parsedCharacters != value.size() || parsed == 0) {
+    std::size_t parsed_characters = 0;
+    const unsigned long parsed = std::stoul(value, &parsed_characters);
+    if (parsed_characters != value.size() || parsed == 0) {
         throw std::invalid_argument("Iteration count must be a positive integer");
     }
     return static_cast<std::size_t>(parsed);
@@ -213,89 +213,88 @@ int main(int argc, char* argv[]) {
 #ifdef ARX_PROJECT_DIR
         // CMake가 주입한 소스 루트를 사용하면 어느 작업 디렉터리에서
         // 실행하더라도 기본 입력과 results 경로를 찾을 수 있다.
-        const fs::path projectDirectory = ARX_PROJECT_DIR;
+        const fs::path project_directory = ARX_PROJECT_DIR;
 #else
         // CMake 외부에서 직접 빌드한 경우에는 현재 디렉터리를 기준으로 한다.
-        const fs::path projectDirectory = fs::current_path();
+        const fs::path project_directory = fs::current_path();
 #endif
         // 첫 번째 인자는 입력 경로, 두 번째 인자는 반복 횟수이다.
         // 인자가 없으면 저장소에 포함된 기본 gradient BMP를 사용한다.
-        const fs::path inputPath =
+        const fs::path input_path =
             argc >= 2 ? fs::path(argv[1])
-                      : projectDirectory / "data_samples" / "gradient_512x512.bmp";
+                      : project_directory / "data_samples" / "gradient_512x512.bmp";
         const std::size_t iterations =
-            argc >= 3 ? parseIterations(argv[2]) : DefaultIterations;
-        const fs::path resultDirectory = projectDirectory / "results";
+            argc >= 3 ? parseIterations(argv[2]) : DEFAULT_ITERATIONS;
+        const fs::path result_directory = project_directory / "results";
 
-        const std::vector<std::uint8_t> plaintext = readBinaryFile(inputPath);
+        // 입력 파일을 전체 읽어서 바이트 벡터로 보관
+        const std::vector<std::uint8_t> plaintext = readBinaryFile(input_path);
 
         // 두 알고리즘을 같은 입력 조건에서 비교하기 위해 동일한 바이트
         // 패턴의 256비트 키와 64비트 논스를 사용한다.
-        Salsa20::Key salsaKey{};
-        ChaCha20::Key chaChaKey{};
-        Salsa20::Nonce salsaNonce{};
-        ChaCha20::Nonce chaChaNonce{};
+        Salsa20::Key salsa_key{};
+        ChaCha20::Key chacha_key{};
+        Salsa20::Nonce salsa_nonce{};
+        ChaCha20::Nonce chacha_nonce{};
 
         // 키는 00, 01, ..., 1f로 구성한다.
-        for (std::size_t i = 0; i < salsaKey.size(); ++i) {
-            salsaKey[i] = static_cast<std::uint8_t>(i);
-            chaChaKey[i] = static_cast<std::uint8_t>(i);
+        for (std::size_t i = 0; i < salsa_key.size(); ++i) {
+            salsa_key[i] = static_cast<std::uint8_t>(i);
+            chacha_key[i] = static_cast<std::uint8_t>(i);
         }
 
         // 논스는 a0, a1, ..., a7로 구성한다.
-        for (std::size_t i = 0; i < salsaNonce.size(); ++i) {
-            salsaNonce[i] = static_cast<std::uint8_t>(0xa0 + i);
-            chaChaNonce[i] = static_cast<std::uint8_t>(0xa0 + i);
+        for (std::size_t i = 0; i < salsa_nonce.size(); ++i) {
+            salsa_nonce[i] = static_cast<std::uint8_t>(0xa0 + i);
+            chacha_nonce[i] = static_cast<std::uint8_t>(0xa0 + i);
         }
 
-        const Salsa20 salsa20(salsaKey, salsaNonce);
-        const ChaCha20 chaCha20(chaChaKey, chaChaNonce);
+        const Salsa20 salsa20(salsa_key, salsa_nonce);
+        const ChaCha20 chaCha20(chacha_key, chacha_nonce);
 
         // 두 알고리즘을 같은 입력 크기와 반복 횟수로 순차 측정한다.
-        const BenchmarkResult salsaResult =
-            benchmarkCipher(salsa20, plaintext, iterations);
-        const BenchmarkResult chaChaResult =
-            benchmarkCipher(chaCha20, plaintext, iterations);
+        const BenchmarkResult salsa_result = benchmarkCipher(salsa20, plaintext, iterations);
+        const BenchmarkResult chacha_result = benchmarkCipher(chaCha20, plaintext, iterations);
 
         // 왕복 검사 외에 ChaCha8 외부 기준값과 알고리즘 간 출력 차이를 확인한다.
-        const bool chaChaVectorPassed = verifyChaCha8KnownVector();
-        const bool ciphertextsDiffer =
-            salsaResult.encrypted != chaChaResult.encrypted;
+        const bool chacha_vector_passed = verifyChaCha8KnownVector();
+        const bool cipher_texts_differ =
+            salsa_result.encrypted != chacha_result.encrypted;
 
         // 암호문과 복호화 결과를 보고서 확인용 파일로 저장한다.
         writeBinaryFile(
-            resultDirectory / "salsa20_encrypted.bmp",
-            salsaResult.encrypted);
+            result_directory / "salsa20_encrypted.bmp",
+            salsa_result.encrypted);
         writeBinaryFile(
-            resultDirectory / "salsa20_decrypted.bmp",
-            salsaResult.decrypted);
+            result_directory / "salsa20_decrypted.bmp",
+            salsa_result.decrypted);
         writeBinaryFile(
-            resultDirectory / "chacha20_encrypted.bmp",
-            chaChaResult.encrypted);
+            result_directory / "chacha20_encrypted.bmp",
+            chacha_result.encrypted);
         writeBinaryFile(
-            resultDirectory / "chacha20_decrypted.bmp",
-            chaChaResult.decrypted);
+            result_directory / "chacha20_decrypted.bmp",
+            chacha_result.decrypted);
 
         // 시간은 소수점 셋째 자리까지, 처리량은 MiB/s 단위로 출력한다.
         std::cout << std::fixed << std::setprecision(3)
-                  << "Input file: " << inputPath << '\n'
+                  << "Input file: " << input_path << '\n'
                   << "Input size: " << plaintext.size() << " bytes\n"
                   << "Benchmark iterations: " << iterations << '\n'
                   << "ChaCha8 known vector: "
-                  << (chaChaVectorPassed ? "PASS" : "FAIL") << '\n';
-        printResult("Salsa20/8", salsaResult);
-        printResult("ChaCha8", chaChaResult);
+                  << (chacha_vector_passed ? "PASS" : "FAIL") << '\n';
+        printResult("Salsa20/8", salsa_result);
+        printResult("ChaCha8", chacha_result);
         std::cout << "\nDifferent algorithm ciphertexts: "
-                  << (ciphertextsDiffer ? "PASS" : "FAIL") << '\n'
-                  << "Result directory: " << resultDirectory << '\n';
+                  << (cipher_texts_differ ? "PASS" : "FAIL") << '\n'
+                  << "Result directory: " << result_directory << '\n';
 
         // 어느 한 항목이라도 실패하면 비정상 종료 코드 1을 반환하여
         // CTest에서도 테스트 실패로 인식할 수 있게 한다.
         const bool passed =
-            chaChaVectorPassed &&
-            allChecksPassed(salsaResult) &&
-            allChecksPassed(chaChaResult) &&
-            ciphertextsDiffer;
+            chacha_vector_passed &&
+            allChecksPassed(salsa_result) &&
+            allChecksPassed(chacha_result) &&
+            cipher_texts_differ;
         std::cout << "Overall result: " << (passed ? "PASS" : "FAIL") << '\n';
         return passed ? 0 : 1;
     } catch (const std::exception& error) {

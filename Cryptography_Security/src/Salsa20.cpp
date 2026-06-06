@@ -6,47 +6,54 @@
 namespace {
 // 256비트 키를 사용하는 Salsa20의 고정 문자열 "expand 32-byte k".
 // 네 개의 32비트 리틀 엔디언 워드로 나누어 상태의 대각선에 배치한다.
-constexpr std::array<std::uint8_t, 16> Sigma{
+constexpr std::array<std::uint8_t, 16> sigma{
     'e', 'x', 'p', 'a', 'n', 'd', ' ', '3',
     '2', '-', 'b', 'y', 't', 'e', ' ', 'k',
 };
 }
 
 Salsa20::Salsa20(const Key& key, const Nonce& nonce) {
-    // Salsa20 초기 상태의 상수는 0, 5, 10, 15번 대각선에 놓인다.
-    initialState_[0] = load32(Sigma.data());
-    initialState_[5] = load32(Sigma.data() + 4);
-    initialState_[10] = load32(Sigma.data() + 8);
-    initialState_[15] = load32(Sigma.data() + 12);
+    /*
+    Salsa20의 4 x 4 상태는 다음과 같이 16개의 32비트 워드로 구성됨.
+    [ 0] constant   [ 1] key       [ 2] key       [ 3] key
+    [ 4] key        [ 5] constant  [ 6] nonce     [ 7] nonce
+    [ 8] counter    [ 9] counter   [10] constant  [11] key
+    [12] key        [13] key       [14] key       [15] constant
+    */
+    // Salsa20 초기 상태 상수
+    initial_state_[0] = load32(sigma.data());
+    initial_state_[5] = load32(sigma.data() + 4);
+    initial_state_[10] = load32(sigma.data() + 8);
+    initial_state_[15] = load32(sigma.data() + 12);
 
-    // 256비트 키의 앞 절반은 1~4번, 뒤 절반은 11~14번에 배치한다.
-    initialState_[1] = load32(key.data());
-    initialState_[2] = load32(key.data() + 4);
-    initialState_[3] = load32(key.data() + 8);
-    initialState_[4] = load32(key.data() + 12);
-    initialState_[11] = load32(key.data() + 16);
-    initialState_[12] = load32(key.data() + 20);
-    initialState_[13] = load32(key.data() + 24);
-    initialState_[14] = load32(key.data() + 28);
+    // 256비트 키 설정
+    initial_state_[1] = load32(key.data());
+    initial_state_[2] = load32(key.data() + 4);
+    initial_state_[3] = load32(key.data() + 8);
+    initial_state_[4] = load32(key.data() + 12);
+    initial_state_[11] = load32(key.data() + 16);
+    initial_state_[12] = load32(key.data() + 20);
+    initial_state_[13] = load32(key.data() + 24);
+    initial_state_[14] = load32(key.data() + 28);
 
     // 64비트 논스는 6번과 7번에 저장한다. 8번과 9번은 카운터용이다.
-    initialState_[6] = load32(nonce.data());
-    initialState_[7] = load32(nonce.data() + 4);
+    initial_state_[6] = load32(nonce.data());
+    initial_state_[7] = load32(nonce.data() + 4);
 }
 
-Salsa20::Block Salsa20::generateBlock(std::uint64_t blockCounter) const {
+Salsa20::Block Salsa20::generateBlock(std::uint64_t block_counter) const {
     // 생성자에서 만든 공통 상태를 복사한 뒤 현재 블록 번호만 채운다.
     // 하위 32비트가 먼저 오는 리틀 엔디언 워드 순서를 사용한다.
-    auto state = initialState_;
-    state[8] = static_cast<std::uint32_t>(blockCounter);
-    state[9] = static_cast<std::uint32_t>(blockCounter >> 32);
+    auto state = initial_state_;
+    state[8] = static_cast<std::uint32_t>(block_counter);
+    state[9] = static_cast<std::uint32_t>(block_counter >> 32);
 
     // 라운드가 끝난 상태에 원래 상태를 더하는 feed-forward 단계에 사용한다.
     const auto original = state;
 
     // column round와 row round가 합쳐져 2라운드가 된다.
     // Salsa20/8에서는 이 double-round를 네 번 수행한다.
-    for (unsigned round = 0; round < Rounds; round += 2) {
+    for (unsigned round = 0; round < ROUNDS; round += 2) {
         columnRound(state);
         rowRound(state);
     }
@@ -62,29 +69,29 @@ Salsa20::Block Salsa20::generateBlock(std::uint64_t blockCounter) const {
 
 std::vector<std::uint8_t> Salsa20::process(
     const std::vector<std::uint8_t>& input,
-    std::uint64_t initialBlockCounter) const {
+    std::uint64_t initial_block_counter) const {
     // 마지막 불완전 블록도 처리할 수 있도록 올림 나눗셈으로 블록 수를 구한다.
-    const std::uint64_t blockCount =
-        (static_cast<std::uint64_t>(input.size()) + BlockSize - 1) / BlockSize;
+    const std::uint64_t block_count =
+        (static_cast<std::uint64_t>(input.size()) + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     // 카운터가 UINT64_MAX를 넘어 다시 0으로 순환하면 같은 키스트림이
     // 재사용되므로, 필요한 마지막 블록 번호를 표현할 수 있는지 확인한다.
-    if (blockCount > 0 &&
-        initialBlockCounter > UINT64_MAX - (blockCount - 1)) {
+    if (block_count > 0 &&
+        initial_block_counter > UINT64_MAX - (block_count - 1)) {
         throw std::overflow_error("Salsa20 block counter overflow");
     }
 
     std::vector<std::uint8_t> output(input.size());
-    for (std::uint64_t blockIndex = 0; blockIndex < blockCount; ++blockIndex) {
+    for (std::uint64_t block_index = 0; block_index < block_count; ++block_index) {
         // 블록마다 카운터를 1씩 증가시켜 서로 다른 키스트림을 생성한다.
-        const Block keyStream = generateBlock(initialBlockCounter + blockIndex);
-        const std::size_t offset = static_cast<std::size_t>(blockIndex) * BlockSize;
+        const Block key_stream = generateBlock(initial_block_counter + block_index);
+        const std::size_t offset = static_cast<std::size_t>(block_index) * BLOCK_SIZE;
 
         // 마지막 블록이 64바이트보다 짧으면 실제 남은 바이트만 XOR한다.
         const std::size_t bytes =
-            std::min(BlockSize, input.size() - offset);
+            std::min(BLOCK_SIZE, input.size() - offset);
         for (std::size_t i = 0; i < bytes; ++i) {
-            output[offset + i] = input[offset + i] ^ keyStream[i];
+            output[offset + i] = input[offset + i] ^ key_stream[i];
         }
     }
     return output;

@@ -14,31 +14,31 @@
 class ChaCha20 {
 public:
     // ChaCha의 키, 논스, 출력 블록 크기를 바이트 단위로 나타낸다.
-    static constexpr std::size_t KeySize = 32;
-    static constexpr std::size_t NonceSize = 8;
-    static constexpr std::size_t BlockSize = 64;
+    static constexpr std::size_t KEY_SIZE = 32;
+    static constexpr std::size_t NONCE_SIZE = 8;
+    static constexpr std::size_t BLOCK_SIZE = 64;
     static constexpr unsigned Rounds = 8;
 
     // 컴파일 시점에 키, 논스, 블록 길이를 고정한다.
-    using Key = std::array<std::uint8_t, KeySize>;
-    using Nonce = std::array<std::uint8_t, NonceSize>;
-    using Block = std::array<std::uint8_t, BlockSize>;
+    using Key = std::array<std::uint8_t, KEY_SIZE>;
+    using Nonce = std::array<std::uint8_t, NONCE_SIZE>;
+    using Block = std::array<std::uint8_t, BLOCK_SIZE>;
 
     // 상수, 키, 논스를 초기 상태에 저장한다.
     // 64비트 블록 카운터는 generateBlock() 호출 시 설정한다.
     ChaCha20(const Key& key, const Nonce& nonce);
 
     // 지정된 블록 카운터의 ChaCha8 키스트림 64바이트를 생성한다.
-    Block generateBlock(std::uint64_t blockCounter) const;
+    Block generateBlock(std::uint64_t block_counter) const;
 
     // 입력과 키스트림을 XOR하여 암호화 또는 복호화한다.
     std::vector<std::uint8_t> process(
         const std::vector<std::uint8_t>& input,
-        std::uint64_t initialBlockCounter = 0) const;
+        std::uint64_t initial_block_counter = 0) const;
 
 private:
     // 4 x 4 상태 행렬. 12번과 13번 카운터 워드는 블록마다 갱신된다.
-    std::array<std::uint32_t, 16> initialState_{};
+    std::array<std::uint32_t, 16> initial_state_{};
 
     // ChaCha ARX 연산에서 사용하는 32비트 순환 왼쪽 회전.
     static std::uint32_t rotateLeft(std::uint32_t value, unsigned bits);
