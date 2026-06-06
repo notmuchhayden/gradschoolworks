@@ -21,6 +21,8 @@ venv/
 !.env.example
 
 # Large or generated binary artifacts
+build/
+cmake-build-*/
 *.bin
 *.bmp
 *.ppm
