@@ -14,11 +14,12 @@ infra/
   postgres_pgvector/init.sql   # pgvector 통합형 DB
 src/ragdb_experiment/
   data_gen.py                  # synthetic 문서/질의 생성
-  embeddings.py                # sentence-transformers 또는 mock embedding
+  embeddings.py                # 결정적 mock embedding 생성
   db.py                        # PostgreSQL/Qdrant 적재
   search.py                    # Qdrant/pgvector 검색
   benchmark.py                 # 기본/필터 검색 측정
   sync_experiment.py           # stale vector 동기화 지연 실험
+  batch_experiment.py          # 구조별 1/100/1000건 배치 갱신 실험
   main.py                      # CLI 진입점
 ```
 
@@ -31,22 +32,17 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-실제 `all-MiniLM-L6-v2` 모델로 임베딩을 생성할 때만 아래 의존성을 추가로 설치한다.
-
-```bash
-pip install -r requirements-model.txt
-```
-
-폐쇄망에서 실제 모델을 사용할 경우 `sentence-transformers/all-MiniLM-L6-v2` 모델 캐시를 미리 준비해야 한다. 모델 준비 전에는 `--mock` 옵션으로 파이프라인 동작을 검증할 수 있다.
+본 실험은 검색 품질이 아니라 배치 갱신 성능과 일관성을 측정하므로 외부 데이터셋과 실제 임베딩 모델을 사용하지 않는다. 고정 seed synthetic 문서와 결정적 mock embedding을 사용한다.
 
 ## 3. 컨테이너 실행
 
 ```bash
+cp .env.example .env
 docker compose up -d
 ragdb-exp wait --timeout 120
 ```
 
-포트는 다음과 같다.
+포트와 실험 기본값은 `.env`에서 변경할 수 있다. 기본 포트는 다음과 같다.
 
 | 서비스 | 포트 | 용도 |
 |---|---:|---|
@@ -67,36 +63,44 @@ ragdb-exp search --engine qdrant --index 0 --k 5
 ragdb-exp search --engine pgvector --index 0 --k 5
 ragdb-exp benchmark-basic --repeats 3 --k 10 --output results/basic_smoke.csv
 ragdb-exp benchmark-filter --repeats 3 --k 10 --output results/filter_smoke.csv
+ragdb-exp sync-batch --engine qdrant --documents 100 --batch-size 100 --repeats 1 --warmup 0 --output results/qdrant_batch_smoke.csv
+ragdb-exp sync-batch --engine pgvector --documents 100 --batch-size 100 --repeats 1 --warmup 0 --output results/pgvector_batch_smoke.csv
 ```
 
-## 5. 실제 모델 기반 실험
+## 5. 구조별 배치 갱신 실험
+
+synthetic 문서 10,000건과 mock embedding을 준비하고 두 구조에 동일하게 적재한다.
 
 ```bash
 ragdb-exp generate --documents 10000 --queries 100
-ragdb-exp embed-docs --batch-size 64
-ragdb-exp embed-queries --batch-size 64
+ragdb-exp embed-docs --mock
+ragdb-exp embed-queries --mock
 ragdb-exp load
-ragdb-exp benchmark-basic --repeats 20 --k 5 10 20 --output results/basic.csv
-ragdb-exp benchmark-filter --repeats 20 --k 10 --output results/filter.csv
-ragdb-exp sync-delay --delay-seconds 5 --modify-ratio 0.1 --output results/sync_delay_5s.csv
 ```
 
-동기화 지연 조건별 측정은 다음처럼 반복한다.
+각 조건 전에 `ragdb-exp load`로 시작 상태를 복원한다.
 
 ```bash
 ragdb-exp load
-ragdb-exp sync-delay --delay-seconds 0 --output results/sync_delay_0s.csv
+ragdb-exp sync-batch --engine qdrant --batch-size 1 --output results/qdrant_batch_1.csv
 ragdb-exp load
-ragdb-exp sync-delay --delay-seconds 30 --output results/sync_delay_30s.csv
+ragdb-exp sync-batch --engine qdrant --batch-size 100 --output results/qdrant_batch_100.csv
 ragdb-exp load
-ragdb-exp sync-delay --delay-seconds 120 --output results/sync_delay_120s.csv
+ragdb-exp sync-batch --engine qdrant --batch-size 1000 --output results/qdrant_batch_1000.csv
+
+ragdb-exp load
+ragdb-exp sync-batch --engine pgvector --batch-size 1 --output results/pgvector_batch_1.csv
+ragdb-exp load
+ragdb-exp sync-batch --engine pgvector --batch-size 100 --output results/pgvector_batch_100.csv
+ragdb-exp load
+ragdb-exp sync-batch --engine pgvector --batch-size 1000 --output results/pgvector_batch_1000.csv
 ```
 
-각 `sync-delay` 실행 전 `ragdb-exp load`를 다시 수행하면 수정 실험 시작 상태를 동일하게 맞출 수 있다.
+기본값은 문서 1,000건, 조건별 30회, warmup 1회이다. `.env`의 `EXPERIMENT_DOCUMENTS`, `EXPERIMENT_REPEATS`, `EXPERIMENT_WARMUP`으로 변경할 수 있다. 수정 임베딩 생성 시간은 측정에서 제외된다.
 
 ## 6. 자원 제한 실험
 
-기본 측정 후 `docker-compose.yml`의 각 서비스에 `deploy.resources.limits` 또는 Docker 실행 옵션을 적용해 다음 조건을 반복 측정한다.
+기본 측정 후 준비된 Compose override를 적용해 같은 여섯 조건을 반복 측정한다.
 
 | 조건 | CPU | Memory |
 |---|---:|---:|
@@ -116,4 +120,4 @@ docker stats rag_postgres_meta rag_postgres_pgvector rag_qdrant
 
 - 기본 검색: `engine`, `k`, `avg_latency_ms`, `p95_latency_ms`, `throughput_qps`, `avg_recall_at_k`
 - 필터 검색: 위 항목 + `result_shortage_rate`
-- 동기화 지연: `engine`, `delay_seconds`, `stale_vector_ratio_before_sync`, `stale_retrieval_count_before_sync`, `update_latency_ms`
+- 배치 갱신: `engine`, `batch_size`, `repeat`, `documents`, `update_operations`, `total_processing_time_ms`, `document_visibility_latency_p95_ms`, `consistency_error_ratio_after_update`

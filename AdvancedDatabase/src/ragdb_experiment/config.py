@@ -3,6 +3,11 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -26,6 +31,15 @@ class Settings:
     
     embedding_dim: int = int(os.getenv(
         "EMBEDDING_DIM", "384"))
+
+    experiment_documents: int = int(os.getenv(
+        "EXPERIMENT_DOCUMENTS", "1000"))
+
+    experiment_repeats: int = int(os.getenv(
+        "EXPERIMENT_REPEATS", "30"))
+
+    experiment_warmup: int = int(os.getenv(
+        "EXPERIMENT_WARMUP", "1"))
 
 
 def get_settings() -> Settings:

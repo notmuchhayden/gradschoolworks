@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from .benchmark import run_benchmark
+from .batch_experiment import run_batch_experiment
 from .config import get_settings
 from .data_gen import generate_dataset
 from .db import load_all, recreate_qdrant_collection, reset_postgres_tables, wait_for_services
@@ -76,6 +77,15 @@ def main() -> None:
     p.add_argument("--delay-max-probes", type=int, default=12)
     p.add_argument("--delay-probe-docs", type=int, default=20)
     p.add_argument("--mock", action="store_true")
+
+    p = subparsers.add_parser("sync-batch")
+    p.add_argument("--engine", choices=["qdrant", "pgvector"], required=True)
+    p.add_argument("--input", type=Path, default=Path("data/documents.embedded.jsonl"))
+    p.add_argument("--output", type=Path, default=Path("results/sync_batch.csv"))
+    p.add_argument("--documents", type=int)
+    p.add_argument("--batch-size", type=int, choices=[1, 100, 1000], required=True)
+    p.add_argument("--repeats", type=int)
+    p.add_argument("--warmup", type=int)
 
     args = parser.parse_args()
     settings = get_settings()
@@ -162,6 +172,30 @@ def main() -> None:
             delay_probe_interval_seconds=args.delay_probe_interval_seconds,
             delay_max_probes=args.delay_max_probes,
             delay_probe_docs=args.delay_probe_docs,
+        )
+    elif args.command == "sync-batch":
+        run_batch_experiment(
+            settings=settings,
+            engine=args.engine,
+            embedded_documents_path=args.input,
+            output_path=args.output,
+            documents=(
+                settings.experiment_documents
+                if args.documents is None
+                else args.documents
+            ),
+            batch_size=args.batch_size,
+            repeats=(
+                settings.experiment_repeats
+                if args.repeats is None
+                else args.repeats
+            ),
+            warmup=(
+                settings.experiment_warmup
+                if args.warmup is None
+                else args.warmup
+            ),
+            dim=settings.embedding_dim,
         )
     else:
         parser.error(f"unknown command: {args.command}")
