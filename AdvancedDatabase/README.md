@@ -84,12 +84,16 @@ ragdb-exp load
 ragdb-exp load
 ragdb-exp sync-batch --engine qdrant --batch-size 1 --output results/qdrant_batch_1.csv
 ragdb-exp load
+ragdb-exp sync-batch --engine qdrant --batch-size 10 --output results/qdrant_batch_10.csv
+ragdb-exp load
 ragdb-exp sync-batch --engine qdrant --batch-size 100 --output results/qdrant_batch_100.csv
 ragdb-exp load
 ragdb-exp sync-batch --engine qdrant --batch-size 1000 --output results/qdrant_batch_1000.csv
 
 ragdb-exp load
 ragdb-exp sync-batch --engine pgvector --batch-size 1 --output results/pgvector_batch_1.csv
+ragdb-exp load
+ragdb-exp sync-batch --engine pgvector --batch-size 10 --output results/pgvector_batch_10.csv
 ragdb-exp load
 ragdb-exp sync-batch --engine pgvector --batch-size 100 --output results/pgvector_batch_100.csv
 ragdb-exp load
@@ -100,7 +104,7 @@ ragdb-exp sync-batch --engine pgvector --batch-size 1000 --output results/pgvect
 
 ## 6. 자원 제한 실험
 
-기본 측정 후 준비된 Compose override를 적용해 같은 여섯 조건을 반복 측정한다.
+기본 측정 후 준비된 Compose override를 적용해 같은 여덟 조건을 반복 측정한다.
 
 | 조건 | CPU | Memory |
 |---|---:|---:|

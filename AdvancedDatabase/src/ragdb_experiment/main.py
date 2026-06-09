@@ -83,7 +83,7 @@ def main() -> None:
     p.add_argument("--input", type=Path, default=Path("data/documents.embedded.jsonl"))
     p.add_argument("--output", type=Path, default=Path("results/sync_batch.csv"))
     p.add_argument("--documents", type=int)
-    p.add_argument("--batch-size", type=int, choices=[1, 100, 1000], required=True)
+    p.add_argument("--batch-size", type=int, choices=[1, 10, 100, 1000], required=True)
     p.add_argument("--repeats", type=int)
     p.add_argument("--warmup", type=int)
 
