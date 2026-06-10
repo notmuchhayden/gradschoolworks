@@ -9,6 +9,8 @@
 
 ```text
 docker-compose.yml
+docker-compose.r2.yml             # R2: 서비스별 2 CPU, 4 GB 제한
+docker-compose.r3.yml             # R3: 서비스별 1 CPU, 2 GB 제한
 infra/
   postgres_meta/init.sql       # Qdrant 분리형의 원문/메타데이터 DB
   postgres_pgvector/init.sql   # pgvector 통합형 DB
@@ -19,25 +21,54 @@ src/ragdb_experiment/
   search.py                    # Qdrant/pgvector 검색
   benchmark.py                 # 기본/필터 검색 측정
   sync_experiment.py           # stale vector 동기화 지연 실험
-  batch_experiment.py          # 구조별 1/100/1000건 배치 갱신 실험
+  batch_experiment.py          # 구조별 1/10/100/1000건 배치 갱신 실험
   main.py                      # CLI 진입점
 ```
 
 ## 2. Python 환경
 
+### 사전 요구사항
+
+- Python 3.10 이상
+- Docker Engine 또는 Docker Desktop
+- Docker Compose v2 (`docker compose` 명령)
+
+모든 명령은 이 `README.md`가 있는 `AdvancedDatabase` 디렉터리에서 실행한다.
+
+### Linux/macOS
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-pip install -e .
+python -m pip install -r requirements.txt
+python -m pip install -e .
+```
+
+### Windows PowerShell
+
+```powershell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
 
 본 실험은 검색 품질이 아니라 배치 갱신 성능과 일관성을 측정하므로 외부 데이터셋과 실제 임베딩 모델을 사용하지 않는다. 고정 seed synthetic 문서와 결정적 mock embedding을 사용한다.
 
 ## 3. 컨테이너 실행
 
+Linux/macOS:
+
 ```bash
 cp .env.example .env
+docker compose up -d
+ragdb-exp wait --timeout 120
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
 docker compose up -d
 ragdb-exp wait --timeout 120
 ```
@@ -78,25 +109,17 @@ ragdb-exp embed-queries --mock
 ragdb-exp load
 ```
 
-각 조건 전에 `ragdb-exp load`로 시작 상태를 복원한다.
+최초 실행에는 `ragdb-exp load`가 필요하다. `sync-batch`는 각 warmup 및 측정 반복 전에 선택한 엔진의 대상 문서를 원래 상태로 자체 복원하므로, 각 배치 조건 사이에서 `ragdb-exp load`를 다시 실행할 필요는 없다. 다만 데이터나 설정을 변경했거나 전체 저장소를 초기 상태로 되돌리려면 다시 실행한다.
 
 ```bash
-ragdb-exp load
 ragdb-exp sync-batch --engine qdrant --batch-size 1 --output results/qdrant_batch_1.csv
-ragdb-exp load
 ragdb-exp sync-batch --engine qdrant --batch-size 10 --output results/qdrant_batch_10.csv
-ragdb-exp load
 ragdb-exp sync-batch --engine qdrant --batch-size 100 --output results/qdrant_batch_100.csv
-ragdb-exp load
 ragdb-exp sync-batch --engine qdrant --batch-size 1000 --output results/qdrant_batch_1000.csv
 
-ragdb-exp load
 ragdb-exp sync-batch --engine pgvector --batch-size 1 --output results/pgvector_batch_1.csv
-ragdb-exp load
 ragdb-exp sync-batch --engine pgvector --batch-size 10 --output results/pgvector_batch_10.csv
-ragdb-exp load
 ragdb-exp sync-batch --engine pgvector --batch-size 100 --output results/pgvector_batch_100.csv
-ragdb-exp load
 ragdb-exp sync-batch --engine pgvector --batch-size 1000 --output results/pgvector_batch_1000.csv
 ```
 
@@ -112,6 +135,31 @@ ragdb-exp sync-batch --engine pgvector --batch-size 1000 --output results/pgvect
 | R2 | 2 CPU | 4 GB |
 | R3 | 1 CPU | 2 GB |
 
+각 조건은 다음 명령으로 적용한다. 조건을 바꿀 때 `--force-recreate`로 컨테이너를 다시 생성한 후 서비스 준비 상태를 확인한다. 명명된 Docker volume은 유지되므로 기존 적재 데이터는 보존된다.
+
+R1:
+
+```bash
+docker compose up -d --force-recreate
+ragdb-exp wait --timeout 120
+```
+
+R2:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.r2.yml up -d --force-recreate
+ragdb-exp wait --timeout 120
+```
+
+R3:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.r3.yml up -d --force-recreate
+ragdb-exp wait --timeout 120
+```
+
+각 자원 조건에서 5절의 여덟 명령을 다시 실행한다. 이전 결과를 덮어쓰지 않도록 `results/r1_*`, `results/r2_*`, `results/r3_*`처럼 자원 조건을 출력 파일명에 포함한다.
+
 측정 중 컨테이너 자원 사용량은 별도 터미널에서 확인한다.
 
 ```bash
@@ -125,3 +173,45 @@ docker stats rag_postgres_meta rag_postgres_pgvector rag_qdrant
 - 기본 검색: `engine`, `k`, `avg_latency_ms`, `p95_latency_ms`, `throughput_qps`, `avg_recall_at_k`
 - 필터 검색: 위 항목 + `result_shortage_rate`
 - 배치 갱신: `engine`, `batch_size`, `repeat`, `documents`, `update_operations`, `total_processing_time_ms`, `document_visibility_latency_p95_ms`, `consistency_error_ratio_after_update`
+
+`sync-batch`는 CSV와 함께 같은 이름의 `*.modified.jsonl` 파일을 생성한다. 이 JSONL 파일은 실험 중 사용한 수정 문서이며, 실험 재실행에는 필요하지 않다.
+
+현재 프로젝트의 `batch_experiment_summary.csv`는 개별 배치 결과를 별도로 집계한 파일이다. 이 저장소에는 요약 파일 생성 명령이 포함되어 있지 않으므로, 원시 측정값 재현의 기준은 구조별 `*_batch_*.csv` 파일이다.
+
+## 8. 제출용 압축 파일
+
+실험 재연 코드와 최종 결과 근거를 함께 제출할 때는 다음 항목을 포함한다.
+
+```text
+README.md
+.env.example
+pyproject.toml
+requirements.txt
+docker-compose.yml
+docker-compose.r2.yml
+docker-compose.r3.yml
+infra/
+src/
+term_project_final_report.md
+results/
+  batch_experiment_summary.csv
+  stale_validation.csv
+  qdrant_batch_1.csv
+  qdrant_batch_10.csv
+  qdrant_batch_100.csv
+  qdrant_batch_1000.csv
+  pgvector_batch_1.csv
+  pgvector_batch_10.csv
+  pgvector_batch_100.csv
+  pgvector_batch_1000.csv
+```
+
+다음 항목은 생성 파일, 로컬 환경 또는 캐시이므로 압축에서 제외한다.
+
+- `.venv/`, `__pycache__/`, `*.pyc`, `*.egg-info/`
+- 비밀번호 등 로컬 설정이 들어갈 수 있는 `.env`
+- 명령으로 다시 생성할 수 있는 `data/`
+- `results/*_smoke.csv`, `results/*.modified.jsonl`
+- Docker volume 데이터와 모델 캐시
+- mock embedding 실험에는 사용하지 않는 `requirements-model.txt`
+
