@@ -87,18 +87,18 @@ int main()
     cin.tie(nullptr);
 
     int n;
-    cin >> n;
+    cin >> n; // 첫째 입력
 
     vector<long long> A(n);
 
     for (int i = 0; i < n; i++)
     {
-        cin >> A[i];
+        cin >> A[i]; // 둘째 입력
     }
 
     MergeSort(A, n);
 
-    cout << InversionCount << '\n';
+    cout << InversionCount << '\n'; // 출력 : 역전쌍의 총 개수
 
     return 0;
 }
