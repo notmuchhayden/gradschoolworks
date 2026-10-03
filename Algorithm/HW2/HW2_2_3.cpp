@@ -25,10 +25,8 @@
 
 #include <algorithm>
 #include <cctype>
-#include <iomanip>
 #include <iostream>
 #include <string>
-#include <utility>
 #include <vector>
 
 using namespace std;
@@ -50,7 +48,7 @@ int ED(
     int ins,        // 삽입 비용
     int del,        // 삭제 비용
     int chg,        // 변경 비용
-    vector<vector<int>>& D) // D 테이블
+    vector<vector<int>>& D) // out : D 테이블
 {
     D[0][0] = 0;
 
@@ -85,8 +83,8 @@ void TR(
     int del,        // 삭제 비용
     int chg,        // 변경 비용
     const vector<vector<int>>& D, // D 테이블
-    string& editX,  // 출력: 편집 과정 X
-    string& editY)  // 출력: 편집 과정 Y
+    string& editX,  // out : 편집 과정 X
+    string& editY)  // out : 편집 과정 Y
 {
     editX.clear();
     editY.clear();
@@ -95,23 +93,28 @@ void TR(
 
     while (i > 0 || j > 0)
     {
-        int c = (i > 0 && j > 0 && EQ(X[i - 1], Y[j - 1]))
-            ? 0 : chg;
+        // X, Y 의 마지막 문자가 같으면 비용 0, 다르면 chg
+        int c = 0;
+        if (i > 0 && j > 0 && EQ(X[i - 1], Y[j - 1]))
+            c = 0;
+        else
+            c = chg;
 
-        if (i > 0 && j > 0 && D[i][j] == D[i - 1][j - 1] + c)
+        // D[i][j]가 어떤 연산으로부터 왔는지 확인
+        if (i > 0 && j > 0 && D[i][j] == D[i - 1][j - 1] + c) // 유지 또는 교체
         {
             editX += X[i - 1];
             editY += Y[j - 1];
             i--;
             j--;
         }
-        else if (i > 0 && D[i][j] == D[i - 1][j] + del)
+        else if (i > 0 && D[i][j] == D[i - 1][j] + del) // 삭제
         {
             editX += X[i - 1];
             editY += '-';
             i--;
         }
-        else
+        else // 삽입
         {
             editX += '-';
             editY += Y[j - 1];
@@ -123,29 +126,28 @@ void TR(
     reverse(editY.begin(), editY.end());
 }
 
-// 정렬된 두 줄에서 원래 문자열을 복원하고 열별 비용을 합산한다.
-// 두 줄이 모두 '-'인 열은 허용하지 않는다.
-// 문제의 표현 방식에서 '-'는 공백 표시용 문자이다.
-bool CheckEdit(const string& A, const string& B,
-               const string& editX, const string& editY,
-               int ins, int del, int chg, int& cost)
+// 각 열의 비용 합이 최소 비용과 같은지 검증
+bool CalcCost( const string& X, const string& Y, // 원본 입력 문자열
+                const string& editX, const string& editY, // 변경 입력 문자열
+                int ins, int del, int chg, int& cost)
 {
     cost = 0;
     if (editX.size() != editY.size())
         return false;
 
-    string X;
-    string Y;
+    string tmpX;
+    string tmpY;
 
     for (size_t j = 0; j < editX.size(); j++)
     {
+        // 두 줄이 모두 '-'인 열은 허용하지 않는다.
         if (editX[j] == '-' && editY[j] == '-')
             return false;
 
         if (editX[j] != '-')
-            X += editX[j];
+            tmpX += editX[j];
         if (editY[j] != '-')
-            Y += editY[j];
+            tmpY += editY[j];
 
         if (editX[j] == '-')
             cost += ins;
@@ -155,70 +157,61 @@ bool CheckEdit(const string& A, const string& B,
             cost += chg;
     }
 
-    return X == A && Y == B;
+    return tmpX == X && tmpY == Y;
 }
 
-string Display(const string& X)
-{
-    return X.empty() ? "(empty)" : X;
-}
-
-// 문제에 지정된 5쌍을 c = 1, c = 3에서 각각 실행하여 표로 출력한다.
-bool PrintExamples()
-{
-    const vector<pair<string, string>> examples = {
-        {"abc", "Yabd"},
-        {"", "Abc"},
-        {"abc", ""},
-        {"same", "Same"},
-        {"ab", "Ba"}
-    };
-    const int ins = 1;
-    const int del = 1;
-    bool allValid = true;
-
-    cout << "삽입/삭제 비용 = 1, 대소문자 구분 없음\n"
-         << "(empty)는 빈 문자열, '-'는 편집 과정의 공백이다.\n\n";
-    cout << left
-         << setw(10) << "A" << setw(10) << "B"
-         << setw(5) << "c" << setw(8) << "Minimum"
-         << setw(12) << "Edit A" << setw(12) << "Edit B"
-         << setw(8) << "Sum" << "Check\n";
-    cout << string(70, '-') << '\n';
-
-    for (const auto& example : examples)
-    {
-        for (int c : {1, 3})
-        {
-            const string& A = example.first;
-            const string& B = example.second;
-            int n = static_cast<int>(A.size());
-            int m = static_cast<int>(B.size());
-            vector<vector<int>> D(n + 1, vector<int>(m + 1));
-            string editX;
-            string editY;
-
-            int cost = ED(A.c_str(), n, B.c_str(), m, ins, del, c, D);
-            TR(A.c_str(), n, B.c_str(), m, del, c, D, editX, editY);
-            int editCost = 0;
-            bool valid = CheckEdit(A, B, editX, editY, ins, del, c, editCost)
-                && editCost == cost;
-            allValid = allValid && valid;
-
-            cout << setw(10) << Display(A) << setw(10) << Display(B)
-                 << setw(5) << c << setw(8) << cost
-                 << setw(12) << Display(editX) << setw(12) << Display(editY)
-                 << setw(8) << editCost << (valid ? "OK" : "FAIL") << '\n';
-        }
-    }
-
-    return allValid;
-}
-
-// 실행하면 지정된 5쌍을 c = 1, c = 3에서 계산한 결과표를 출력한다.
+// 입력: 첫 줄 A, 둘째 줄 B, 셋째 줄 교체 비용 c. 빈 문자열은 빈 줄로 입력한다.
+// 출력: 최소 비용, A의 편집 과정, B의 편집 과정을 각각 한 줄에 출력한다.
 int main()
 {
     ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-    return PrintExamples() ? 0 : 1;
+    string A;
+    string B;
+    int c;
+    if (!getline(cin, A) || !getline(cin, B) || !(cin >> c))
+    {
+        cerr << "A, B, 정수 c를 순서대로 입력하세요.\n";
+        return 1;
+    }
+    if (A.size() > 200 || B.size() > 200 || c < 1 || c > 100)
+    {
+        cerr << "A와 B의 길이는 0~200, c는 1~100이어야 합니다.\n";
+        return 1;
+    }
+    if (A.find('-') != string::npos || B.find('-') != string::npos)
+    {
+        cerr << "'-'는 편집 과정의 공백 표시이므로 입력 문자열에 사용할 수 없습니다.\n";
+        return 1;
+    }
+
+    // 전역 공유 변수
+    const int ins = 1;
+    const int del = 1;
+    int n = static_cast<int>(A.size());
+    int m = static_cast<int>(B.size());
+    vector<vector<int>> D(n + 1, vector<int>(m + 1)); // D 테이블
+    string editX; // X의 편집 과정
+    string editY; // Y의 편집 과정
+
+    // 최소 비용 계산 및 테이블 D 구축
+    int cost = ED(A.c_str(), n, B.c_str(), m, ins, del, c, D);
+    // 편집 과정 역추적
+    TR(A.c_str(), n, B.c_str(), m, del, c, D, editX, editY);
+
+    int editCost = 0;
+    if (!CalcCost(A, B, editX, editY, ins, del, c, editCost))
+    {
+        cerr << "열별비용 합 검증 실패\n";
+        return 1;
+    }
+
+    if (editCost != cost) {
+        cerr << "편집 비용과 최소 비용 불일치\n";
+        return 1;
+    }
+
+    cout << cost << '\n' << editX << '\n' << editY << '\n';
+    return 0;
 }
