@@ -27,7 +27,6 @@
 #include <cctype>
 #include <iostream>
 #include <string>
-#include <vector>
 
 using namespace std;
 
@@ -48,7 +47,7 @@ int ED(
     int ins,        // 삽입 비용
     int del,        // 삭제 비용
     int chg,        // 변경 비용
-    vector<vector<int>>& D) // out : D 테이블
+    int D[201][201]) // out : D 테이블
 {
     D[0][0] = 0;
 
@@ -82,7 +81,7 @@ void TR(
     int m,          // 문자배열 Y의 크기
     int del,        // 삭제 비용
     int chg,        // 변경 비용
-    const vector<vector<int>>& D, // D 테이블
+    const int D[201][201], // D 테이블
     string& editX,  // out : 편집 과정 X
     string& editY)  // out : 편집 과정 Y
 {
@@ -191,7 +190,7 @@ int main()
     const int del = 1;
     int n = static_cast<int>(A.size());
     int m = static_cast<int>(B.size());
-    vector<vector<int>> D(n + 1, vector<int>(m + 1)); // D 테이블
+    int D[201][201]; // D 테이블
     string editX; // X의 편집 과정
     string editY; // Y의 편집 과정
 
