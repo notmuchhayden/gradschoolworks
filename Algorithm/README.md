@@ -63,7 +63,8 @@ cmake -S Algorithm/HW2 -B Algorithm/HW2/build -G "Visual Studio 17 2022" -A x64
 cmake --build Algorithm/HW2/build --config Release
 ```
 
-[HW2_2_3.cpp](HW2/HW2_2_3.cpp)를 빌드하여 `Algorithm/HW2/build/Release/HW2_2_3.exe`를 생성한다.
+[HW2_2_3.cpp](HW2/HW2_2_3.cpp)와 [HW2_4_2.cpp](HW2/HW2_4_2.cpp)를 빌드하여
+`Algorithm/HW2/build/Release/` 아래에 각각의 실행 파일을 생성한다.
 
 ### 실행
 
@@ -95,6 +96,23 @@ Yabd-
 첫 줄은 최소 비용, 다음 두 줄은 `-`로 길이를 맞춘 최적 편집 과정 하나이다.
 빈 편집 문자열도 빈 줄로 출력한다. 출력 전에 원래 문자열 복원, 양쪽 모두 `-`인 열의 부재,
 열별 비용 합과 최소 비용의 일치를 검증한다.
+
+### 해싱 실험 (HW2_4_2)
+
+입력 파일이 있는 폴더로 이동한 뒤 실행한다. 네 파일에 선형 탐사와 이중 해싱을 각각 적용한다.
+
+```powershell
+Push-Location Algorithm/HW2
+.\build\Release\HW2_4_2.exe
+Pop-Location
+```
+
+각 파일의 실제 삽입 키(성공 탐색과 같은 순서), 실패 질의 순서와 두 방식의 결과를 출력한다.
+결과 항목은 삽입 평균, 성공 탐색 평균, 실패 탐색 평균 및 최대 탐사 횟수이다.
+처음 확인한 칸과 마지막 빈칸도 탐사 횟수에 포함한다. 빈칸은 `-1`로 표시하여 키 `0`과 구분한다.
+
+문제 주석의 이중 해싱 식에 있는 `m mod m`은 오기로 보고, 첨부 강의록의
+`h1(k) = k mod m`을 적용했다. 두 번째 해시 함수는 문제에서 지정한 `1 + k mod (m - 1)`이다.
 
 ## 수정 후 다시 빌드
 
