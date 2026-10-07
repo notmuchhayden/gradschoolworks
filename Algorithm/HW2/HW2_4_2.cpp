@@ -4,7 +4,7 @@
 일로 성능을 비교하세요. 탐사 위치는 다음과 같습니다. (코딩, 10점)
 - 선형 탐사 : H(k, i) = ((k mod m) + i) mod m
 - 이중 해싱 :
-	- H(k, i) = ((m mod m) + i * h2(k)) mod m
+	- H(k, i) = ((k mod m) + i * h2(k)) mod m
 	- h2(k) = 1 + (k mod (m - 1))
 	
 [구현 조건]
@@ -37,6 +37,11 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 using namespace std;
 
@@ -86,7 +91,7 @@ int Search(const int T[], int k, bool doubleHash, int& count)
 }
 
 // 하나의 방식으로 삽입, 성공 탐색, 실패 탐색을 수행한다.
-bool Experiment(const int keys[], const int queries[], int n, bool doubleHash)
+bool Experiment(const int keys[], const int queries[], int n, bool doubleHash, ostream& output)
 {
     int T[M];
     for (int i = 0; i < M; i++)
@@ -124,11 +129,11 @@ bool Experiment(const int keys[], const int queries[], int n, bool doubleHash)
     }
 
     if (doubleHash)
-        cout << "이중 해싱";
+        output << "이중 해싱";
     else
-        cout << "선형 탐사";
+        output << "선형 탐사";
 
-    cout << " | " << (double)insertSum / n
+    output << " | " << (double)insertSum / n
          << " | " << (double)successSum / n
          << " | " << (double)failSum / n
          << " | " << failMax << '\n';
@@ -137,8 +142,22 @@ bool Experiment(const int keys[], const int queries[], int n, bool doubleHash)
 
 int main()
 {
+#ifdef _WIN32
+    // /utf-8로 빌드한 한글 문자열에 맞춰 콘솔 출력 인코딩을 설정한다.
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
+    ofstream result("result.txt");
+    if (!result)
+    {
+        cerr << "result.txt 파일을 생성할 수 없습니다.\n";
+        return 1;
+    }
+
+    // 콘솔과 파일에 같은 결과를 출력하도록 전체 출력을 모은다.
+    ostringstream output;
     const char* files[4] = { "R_200.txt", "R_800.txt", "C_200.txt", "C_800.txt" };
-    cout << fixed << setprecision(5);
+    output << fixed << setprecision(5);
 
     // 입력 파일이 있는 Algorithm/HW2 폴더에서 실행한다.
     for (int f = 0; f < 4; f++)
@@ -177,20 +196,28 @@ int main()
         }
 
         // 두 방식 모두 아래에 출력한 순서를 그대로 사용한다.
-        cout << '\n' << files[f] << " (m=" << m << ", n=" << n << ")\n";
-        cout << "삽입 키 및 성공 탐색 순서:\n";
+        output << '\n' << files[f] << " (m=" << m << ", n=" << n << ")\n";
+        output << "삽입 키 및 성공 탐색 순서:\n";
         for (int i = 0; i < n; i++)
-            cout << keys[i] << (i == n - 1 ? '\n' : ' ');
-        cout << "실패 탐색 질의 순서:\n";
+            output << keys[i] << (i == n - 1 ? '\n' : ' ');
+        output << "실패 탐색 질의 순서:\n";
         for (int i = 0; i < n; i++)
-            cout << queries[i] << (i == n - 1 ? '\n' : ' ');
+            output << queries[i] << (i == n - 1 ? '\n' : ' ');
 
-        cout << "방식 | 삽입 평균 | 성공 탐색 평균 | 실패 탐색 평균 | 실패 탐색 최대\n";
-        if (!Experiment(keys, queries, n, false) || !Experiment(keys, queries, n, true))
+        output << "방식 | 삽입 평균 | 성공 탐색 평균 | 실패 탐색 평균 | 실패 탐색 최대\n";
+        if (!Experiment(keys, queries, n, false, output) || !Experiment(keys, queries, n, true, output))
         {
             cerr << "삽입 또는 탐색 결과가 예상과 다릅니다.\n";
             return 1;
         }
+    }
+    cout << output.str();
+    result << output.str();
+    result.close();
+    if (!result)
+    {
+        cerr << "result.txt 파일에 결과를 저장할 수 없습니다.\n";
+        return 1;
     }
     return 0;
 }
